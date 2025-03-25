@@ -7,33 +7,24 @@ import BodyPanel from './body-panel';
 import ScriptsPanel from './scripts-panel';
 import SettingsPanel from './settings-panel';
 import { Editor } from '@tiptap/react';
+import { AuthConfigType, AuthType, BodyType, FormDataItemType, ParamItemType } from '@/types/api-types';
 
 interface RequestTabsProps {
     // All the props from the parent component
-    params: { key: string; value: string; description: string; checked: boolean }[];
-    setParams: React.Dispatch<
-        React.SetStateAction<{ key: string; value: string; description: string; checked: boolean }[]>
-    >;
-    headers: { key: string; value: string; description: string; checked: boolean }[];
-    setHeaders: React.Dispatch<
-        React.SetStateAction<{ key: string; value: string; description: string; checked: boolean }[]>
-    >;
-    authType: string;
-    setAuthType: React.Dispatch<React.SetStateAction<string>>;
-    authConfig: any;
-    setAuthConfig: React.Dispatch<React.SetStateAction<any>>;
-    bodyType: string;
-    setBodyType: React.Dispatch<React.SetStateAction<string>>;
-    formData: { key: string; value: string; description: string; type: 'text' | 'file'; checked: boolean }[];
-    setFormData: React.Dispatch<
-        React.SetStateAction<
-            { key: string; value: string; description: string; type: 'text' | 'file'; checked: boolean }[]
-        >
-    >;
-    urlEncodedData: { key: string; value: string; description: string; checked: boolean }[];
-    setUrlEncodedData: React.Dispatch<
-        React.SetStateAction<{ key: string; value: string; description: string; checked: boolean }[]>
-    >;
+    params: ParamItemType[];
+    setParams: React.Dispatch<React.SetStateAction<ParamItemType[]>>;
+    headers: ParamItemType[];
+    setHeaders: React.Dispatch<React.SetStateAction<ParamItemType[]>>;
+    authType: AuthType;
+    setAuthType: React.Dispatch<React.SetStateAction<AuthType>>;
+    authConfig: AuthConfigType;
+    setAuthConfig: React.Dispatch<React.SetStateAction<AuthConfigType>>;
+    bodyType: BodyType;
+    setBodyType: React.Dispatch<React.SetStateAction<BodyType>>;
+    formData: FormDataItemType[];
+    setFormData: React.Dispatch<React.SetStateAction<FormDataItemType[]>>;
+    urlEncodedData: ParamItemType[];
+    setUrlEncodedData: React.Dispatch<React.SetStateAction<ParamItemType[]>>;
     rawFormat: 'text' | 'json' | 'xml' | 'html' | 'javascript';
     setRawFormat: React.Dispatch<React.SetStateAction<'text' | 'json' | 'xml' | 'html' | 'javascript'>>;
     graphqlQuery: string;

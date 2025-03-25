@@ -6,6 +6,79 @@ This template should help get you started developing with Tauri, React and Types
 
 - [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
 
+# Running Tauri and Python Servers
+
+This guide explains how to set up and run both a Tauri application and a Python server on macOS with proper logging.
+
+## Prerequisites
+
+- macOS operating system
+- Node.js and npm installed
+- Python 3.x installed
+- Tauri development environment set up
+- Git (optional, for version control)
+
+## Setup Instructions
+
+1. Clone or download this repository to your local machine.
+2. Ensure you have the necessary permissions to execute the scripts.
+
+## Make Scripts Executable
+
+After creating these scripts, make them executable:
+
+```bash
+chmod +x run_servers.sh monitor_logs.sh stop_servers.sh
+```
+
+## Directory Structure
+
+Ensure your project follows this structure (modify paths in scripts if different):
+
+```
+your-project/
+├── tauri-app/         # Your Tauri application
+├── python-server/     # Your Python server
+│   ├── server.py      # Main Python server file
+│   └── requirements.txt
+├── logs/              # Created automatically to store logs
+├── run_servers.sh     # Script to start both servers
+├── monitor_logs.sh    # Script to view logs
+└── stop_servers.sh    # Script to stop servers
+```
+
+## Usage
+
+1. **Start both servers**:
+   ```bash
+   ./run_servers.sh
+   ```
+
+2. **Monitor logs in real-time**:
+   ```bash
+   ./monitor_logs.sh
+   ```
+
+3. **Stop all servers**:
+   ```bash
+   ./stop_servers.sh
+   ```
+
+## Logging Configuration
+
+## Troubleshooting
+
+- **Scripts not executing**: Ensure they have executable permissions with `chmod +x *.sh`
+- **Paths not found**: Update the directory paths in the scripts to match your project structure
+- **No logs appearing**: Check that the logs directory exists and has write permissions
+- **Servers not stopping**: Use `ps aux | grep python` or `ps aux | grep tauri` to find processes manually, then kill them
+
+## Notes
+
+- Customize the scripts for your specific server configurations
+- For production deployments, consider using process managers like PM2 or supervisor
+- These scripts are designed for development environments on macOS
+
 # Api Tool Ideas
 
 ### Why

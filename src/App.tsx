@@ -1,6 +1,6 @@
 import './App.css';
 import AppLayout from '@/layouts/app-layout';
-import ApiRequest from './components/api-call';
+import ApiRequest from './pages/api-call';
 
 function App() {
     return (

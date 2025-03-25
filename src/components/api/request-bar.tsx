@@ -14,6 +14,11 @@ interface RequestBarProps {
 }
 
 const RequestBar: React.FC<RequestBarProps> = ({ method, setMethod, url, setUrl, onSendRequest }) => {
+    const handleUrlInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const url = e.target.value;
+        setUrl(url);
+    };
+
     return (
         <div className="flex-row items-center justify-between">
             <div className="flex items-center space-x-2 py-2">
@@ -32,7 +37,7 @@ const RequestBar: React.FC<RequestBarProps> = ({ method, setMethod, url, setUrl,
                 <Input
                     placeholder="Enter request URL"
                     value={url}
-                    onChange={e => setUrl(e.target.value)}
+                    onChange={handleUrlInputChange}
                     className="flex-grow"
                 />
                 <Button onClick={onSendRequest}>Send</Button>

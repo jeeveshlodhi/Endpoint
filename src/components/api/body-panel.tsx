@@ -6,22 +6,17 @@ import UrlEncodedBody from './body-types/url-encoded-body';
 import RawBody from './body-types/raw-body';
 import BinaryBody from './body-types/binary-body';
 import GraphQLBody from './body-types/graphQL-body';
+import { BodyType, FormDataItemType, ParamItemType, RawFormat } from '@/types/api-types';
 
 interface BodyPanelProps {
-    bodyType: string;
-    setBodyType: React.Dispatch<React.SetStateAction<string>>;
-    formData: { key: string; value: string; description: string; type: 'text' | 'file'; checked: boolean }[];
-    setFormData: React.Dispatch<
-        React.SetStateAction<
-            { key: string; value: string; description: string; type: 'text' | 'file'; checked: boolean }[]
-        >
-    >;
-    urlEncodedData: { key: string; value: string; description: string; checked: boolean }[];
-    setUrlEncodedData: React.Dispatch<
-        React.SetStateAction<{ key: string; value: string; description: string; checked: boolean }[]>
-    >;
-    rawFormat: 'text' | 'json' | 'xml' | 'html' | 'javascript';
-    setRawFormat: React.Dispatch<React.SetStateAction<'text' | 'json' | 'xml' | 'html' | 'javascript'>>;
+    bodyType: BodyType;
+    setBodyType: React.Dispatch<React.SetStateAction<BodyType>>;
+    formData: FormDataItemType[];
+    setFormData: React.Dispatch<React.SetStateAction<FormDataItemType[]>>;
+    urlEncodedData: ParamItemType[];
+    setUrlEncodedData: React.Dispatch<React.SetStateAction<ParamItemType[]>>;
+    rawFormat: RawFormat;
+    setRawFormat: React.Dispatch<React.SetStateAction<RawFormat>>;
     graphqlQuery: string;
     setGraphqlQuery: React.Dispatch<React.SetStateAction<string>>;
     graphqlVariables: string;
@@ -32,8 +27,22 @@ interface BodyPanelProps {
 }
 
 const BodyPanel: React.FC<BodyPanelProps> = props => {
+    const handleValueChange = (value: string) => {
+        // Check if value is a valid BodyType before setting it
+        if (
+            value === 'none' ||
+            value === 'form-data' ||
+            value === 'x-www-form-urlencoded' ||
+            value === 'raw' ||
+            value === 'binary' ||
+            value === 'graphql'
+        ) {
+            props.setBodyType(value as BodyType);
+        }
+    };
+
     return (
-        <Tabs defaultValue="none" onValueChange={value => props.setBodyType(value)}>
+        <Tabs defaultValue="none" onValueChange={handleValueChange} value={props.bodyType}>
             <TabsList>
                 <TabsTrigger value="none">none</TabsTrigger>
                 <TabsTrigger value="form-data">form-data</TabsTrigger>

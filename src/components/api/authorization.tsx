@@ -6,27 +6,45 @@ import ApiKeyAuthForm from './auth-forms/apikey-auth-form';
 import OAuth2Form from './auth-forms/oauth2-form';
 import DigestAuthForm from './auth-forms/digest-auth-form';
 import AwsAuthForm from './auth-forms/aws-auth-form';
+import { AuthConfigType, AuthType } from '@/types/api-types';
 
 interface AuthorizationProps {
-    authType: string;
-    setAuthType: React.Dispatch<React.SetStateAction<string>>;
+    authType: AuthType;
+    setAuthType: React.Dispatch<React.SetStateAction<AuthType>>;
     authConfig: any;
     setAuthConfig: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const Authorization: React.FC<AuthorizationProps> = ({ authType, setAuthType, authConfig, setAuthConfig }) => {
-    const updateAuthConfig = (key: string, value: any) => {
+    const updateAuthConfig = (key: keyof AuthConfigType, value: any) => {
         setAuthConfig({
             ...authConfig,
             [key]: value,
         });
     };
 
+    const handleAuthTypeChange = (value: string) => {
+        // Check if value is a valid AuthType before setting it
+        if (
+            value === 'no-auth' ||
+            value === 'bearer' ||
+            value === 'basic' ||
+            value === 'api-key' ||
+            value === 'oauth2' ||
+            value === 'digest' ||
+            value === 'hawk' ||
+            value === 'aws'
+        ) {
+            setAuthType(value as AuthType);
+        }
+    };
+
     return (
         <div className="w-full grid grid-cols-5">
             <div className="p-2 col-span-1 border-r-2 border-zinc-200">
                 <h2>Auth Type</h2>
-                <Select value={authType} onValueChange={setAuthType}>
+                <Select value={authType} onValueChange={handleAuthTypeChange}>
+                    {' '}
                     <SelectTrigger>
                         <SelectValue placeholder="Select Authorization Type" />
                     </SelectTrigger>
@@ -47,14 +65,14 @@ const Authorization: React.FC<AuthorizationProps> = ({ authType, setAuthType, au
                     <div className="text-sm text-gray-500">No authentication will be used for this request.</div>
                 )}
 
-                {authType === 'bearer' && (
+                {authType === 'bearer-token' && (
                     <BearerAuthForm
                         token={authConfig.bearerToken}
                         setToken={token => updateAuthConfig('bearerToken', token)}
                     />
                 )}
 
-                {authType === 'basic' && (
+                {authType === 'basic-auth' && (
                     <BasicAuthForm
                         username={authConfig.basicAuth.username}
                         password={authConfig.basicAuth.password}
@@ -78,7 +96,7 @@ const Authorization: React.FC<AuthorizationProps> = ({ authType, setAuthType, au
                     <OAuth2Form oauth={authConfig.oauth2} setOauth={oauth => updateAuthConfig('oauth2', oauth)} />
                 )}
 
-                {authType === 'digest' && (
+                {authType === 'digest-auth' && (
                     <DigestAuthForm
                         username={authConfig.digestAuth.username}
                         password={authConfig.digestAuth.password}
@@ -87,7 +105,7 @@ const Authorization: React.FC<AuthorizationProps> = ({ authType, setAuthType, au
                     />
                 )}
 
-                {authType === 'aws' && (
+                {authType === 'aws-auth' && (
                     <AwsAuthForm aws={authConfig.awsAuth} setAws={aws => updateAuthConfig('awsAuth', aws)} />
                 )}
             </div>
