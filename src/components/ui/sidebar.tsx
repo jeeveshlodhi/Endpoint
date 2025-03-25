@@ -123,7 +123,7 @@ function SidebarProvider({
                         } as React.CSSProperties
                     }
                     className={cn(
-                        'group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full flex-shrink-0',
+                        'group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex w-full flex-shrink-0',
                         className,
                     )}
                     {...props}
@@ -153,7 +153,7 @@ function Sidebar({
         return (
             <div
                 data-slot="sidebar"
-                className={cn('bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col', className)}
+                className={cn('bg-sidebar text-sidebar-foreground flex w-(--sidebar-width) flex-col', className)}
                 {...props}
             >
                 {children}
@@ -198,7 +198,7 @@ function Sidebar({
             {/* This is what handles the sidebar gap on desktop */}
             <div
                 className={cn(
-                    'relative h-svh w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear',
+                    'relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear',
                     'group-data-[collapsible=offcanvas]:w-0',
                     'group-data-[side=right]:rotate-180',
                     variant === 'floating' || variant === 'inset'
@@ -221,9 +221,9 @@ function Sidebar({
                 {...props}
             >
                 <div
-                    style={{ height: '-webkit-fill-available', marginBottom: 20 }}
+                    style={{ height: '-webkit-fill-available', paddingBottom: '20px' }}
                     data-sidebar="sidebar"
-                    className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex mt-10 min-h-fit w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
+                    className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex mt-10 w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
                 >
                     {children}
                 </div>
@@ -362,26 +362,25 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<'div'>) {
     );
 }
 
-function SidebarGroupLabel({
-    className,
-    asChild = false,
-    ...props
-}: React.ComponentProps<'div'> & { asChild?: boolean }) {
-    const Comp = asChild ? Slot : 'div';
+const SidebarGroupLabel = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'> & { asChild?: boolean }>(
+    ({ className, asChild = false, ...props }, ref) => {
+        const Comp = asChild ? Slot : 'div';
 
-    return (
-        <Comp
-            data-slot="sidebar-group-label"
-            data-sidebar="group-label"
-            className={cn(
-                'text-sidebar-foreground/70 ring-sidebar-ring flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0',
-                'group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0',
-                className,
-            )}
-            {...props}
-        />
-    );
-}
+        return (
+            <Comp
+                ref={ref}
+                data-slot="sidebar-group-label"
+                data-sidebar="group-label"
+                className={cn(
+                    'text-sidebar-foreground/70 ring-sidebar-ring flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0',
+                    'group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0',
+                    className,
+                )}
+                {...props}
+            />
+        );
+    },
+);
 
 function SidebarGroupAction({
     className,
@@ -474,11 +473,11 @@ function SidebarMenuButton({
     isActive?: boolean;
     tooltip?: string | React.ComponentProps<typeof TooltipContent>;
 } & VariantProps<typeof sidebarMenuButtonVariants>) {
-    const Comp = asChild ? Slot : 'button';
     const { isMobile, state } = useSidebar();
 
-    const button = (
-        <Comp
+    // Create the button with proper ref forwarding
+    const buttonContent = (props: any) => (
+        <button
             data-slot="sidebar-menu-button"
             data-sidebar="menu-button"
             data-size={size}
@@ -487,6 +486,15 @@ function SidebarMenuButton({
             {...props}
         />
     );
+
+    // Use React.forwardRef for when asChild is true
+    const ButtonComp = asChild
+        ? Slot
+        : React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>((props, ref) =>
+              buttonContent({ ...props, ref }),
+          );
+
+    const button = <ButtonComp {...props} />;
 
     if (!tooltip) {
         return button;
@@ -515,10 +523,9 @@ function SidebarMenuAction({
     asChild?: boolean;
     showOnHover?: boolean;
 }) {
-    const Comp = asChild ? Slot : 'button';
-
-    return (
-        <Comp
+    // Create the button with proper ref forwarding
+    const buttonContent = (props: any) => (
+        <button
             data-slot="sidebar-menu-action"
             data-sidebar="menu-action"
             className={cn(
@@ -536,6 +543,14 @@ function SidebarMenuAction({
             {...props}
         />
     );
+
+    const ButtonComp = asChild
+        ? Slot
+        : React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>((props, ref) =>
+              buttonContent({ ...props, ref }),
+          );
+
+    return <ButtonComp {...props} />;
 }
 
 function SidebarMenuBadge({ className, ...props }: React.ComponentProps<'div'>) {
@@ -616,21 +631,19 @@ function SidebarMenuSubItem({ className, ...props }: React.ComponentProps<'li'>)
     );
 }
 
-function SidebarMenuSubButton({
-    asChild = false,
-    size = 'md',
-    isActive = false,
-    className,
-    ...props
-}: React.ComponentProps<'a'> & {
-    asChild?: boolean;
-    size?: 'sm' | 'md';
-    isActive?: boolean;
-}) {
+const SidebarMenuSubButton = React.forwardRef<
+    HTMLAnchorElement,
+    React.ComponentProps<'a'> & {
+        asChild?: boolean;
+        size?: 'sm' | 'md';
+        isActive?: boolean;
+    }
+>(({ asChild = false, size = 'md', isActive = false, className, ...props }, ref) => {
     const Comp = asChild ? Slot : 'a';
 
     return (
         <Comp
+            ref={ref}
             data-slot="sidebar-menu-sub-button"
             data-sidebar="menu-sub-button"
             data-size={size}
@@ -646,7 +659,7 @@ function SidebarMenuSubButton({
             {...props}
         />
     );
-}
+});
 
 export {
     Sidebar,

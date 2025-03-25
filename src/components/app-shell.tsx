@@ -7,7 +7,9 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, variant = 'header' }: AppShellProps) {
-    const [isOpen, setIsOpen] = useState(() => (typeof window !== 'undefined' ? localStorage.getItem('sidebar') !== 'false' : true));
+    const [isOpen, setIsOpen] = useState(() =>
+        typeof window !== 'undefined' ? localStorage.getItem('sidebar') !== 'false' : true,
+    );
 
     const handleSidebarChange = (open: boolean) => {
         setIsOpen(open);
@@ -18,7 +20,7 @@ export function AppShell({ children, variant = 'header' }: AppShellProps) {
     };
 
     if (variant === 'header') {
-        return <div className="flex min-h-screen w-full flex-col">{children}</div>;
+        return <div className="flex w-full flex-col">{children}</div>;
     }
 
     return (

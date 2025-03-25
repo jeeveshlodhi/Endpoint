@@ -2,6 +2,7 @@ import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { ParamItemType } from '@/types/api-types';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
@@ -11,6 +12,8 @@ interface RequestBarProps {
     url: string;
     setUrl: (url: string) => void;
     onSendRequest: () => void;
+    params: ParamItemType[];
+    setParams: React.Dispatch<React.SetStateAction<ParamItemType[]>>;
 }
 
 const RequestBar: React.FC<RequestBarProps> = ({ method, setMethod, url, setUrl, onSendRequest }) => {

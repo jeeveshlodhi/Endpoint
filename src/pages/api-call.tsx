@@ -203,15 +203,30 @@ const ApiClient: React.FC = () => {
         return {};
     };
 
+    const formatUrl = (url: string): string => {
+        if (!/^https?:\/\//i.test(url)) {
+            return `https://${url}`; // Defaulting to https if protocol is missing
+        }
+        try {
+            const formattedUrl = new URL(url);
+            return formattedUrl.href;
+        } catch (error) {
+            console.error('Invalid URL format', error);
+            return url; // Return as-is if URL is invalid
+        }
+    };
+
     const handleSendRequest = async (): Promise<void> => {
         setIsLoading(true);
         setError(null);
         setResponse(null);
 
+        const formattedUrl = formatUrl(url);
+
         // Create the request payload
         const requestData: RequestPayloadType = {
             method: method,
-            url: url,
+            url: formattedUrl,
             headers: buildRequestHeaders(),
             params: buildRequestParams(),
             body: buildRequestBody(),
@@ -291,6 +306,8 @@ const ApiClient: React.FC = () => {
                 url={url}
                 setUrl={setUrl}
                 onSendRequest={handleSendRequest}
+                params={params}
+                setParams={setParams}
                 // isLoading={isLoading}
             />
 

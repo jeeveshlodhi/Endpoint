@@ -11,9 +11,7 @@ export default function AppSidebarLayout({ children }: PropsWithChildren) {
             <AppTitle />
             <div className="flex flex-1 overflow-hidden">
                 <AppShell variant="sidebar">
-                    <div className="h-full">
-                        <AppSidebar />
-                    </div>
+                    <AppSidebar />
                     <AppContent variant="sidebar" className="flex-1 overflow-hidden">
                         <AppSidebarHeader />
                         <div className="h-full w-full overflow-auto">{children}</div>
