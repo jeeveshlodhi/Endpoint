@@ -1,7 +1,7 @@
 # Endpoint: Advanced API Testing Tool
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jeeveshlodhi/Endpoint/refs/heads/master/src/assets/Endpoint.png" alt="Endpoint Logo" width="200" height="200" />
+  <img src="https://raw.githubusercontent.com/jeeveshlodhi/Endpoint/refs/heads/master/src/assets/Endpoint.png" alt="Endpoint Logo" width="100" height="100" />
 </p>
 
 <p align="center">
