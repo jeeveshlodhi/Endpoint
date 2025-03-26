@@ -1,17 +1,51 @@
 import React from 'react';
-import { Editor } from '@tiptap/react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CodeEditor from '../general-components/editor';
 import { ResponseDataType } from '@/types/api-types';
+import LoadingSkeleton, { MultiStepLoader } from './loaders/loading-skeleton';
 
 interface ResponsePanelProps {
-    responseEditor: Editor | null;
+    responseEditor: string | null;
     responseType: 'text' | 'json' | 'html';
     setResponseType: (type: 'text' | 'json' | 'html') => void;
     response: ResponseDataType | null;
     error: string | null;
     isLoading: boolean;
 }
+
+const loadingStates = [
+    { text: 'Training digital hamsters to run faster' },
+    { text: 'Convincing the server to cooperate' },
+    { text: 'Reticulating splines' },
+    { text: 'Counting to infinity (twice)' },
+    { text: 'Generating witty dialog...' },
+    { text: 'Brewing coffee for the developers' },
+    { text: 'Warming up the quantum fluctuator' },
+    { text: 'Untangling the digital spaghetti' },
+    { text: 'Checking if anyone actually reads these' },
+    { text: 'Converting caffeine to code' },
+    { text: 'Searching for the last digit of π' },
+    { text: 'Calculating the meaning of life' },
+    { text: 'Teaching AI to appreciate humor' },
+    { text: 'Waiting for the universe to respond' },
+    { text: 'Mining some cryptocurrency while we wait' },
+    { text: 'Entertaining you with loading messages' },
+    { text: 'Dividing by zero (carefully)' },
+    { text: 'Polishing pixels to make them shinier' },
+    { text: 'Summoning digital demons' },
+    { text: 'Downloading more RAM' },
+    { text: 'Taking a quick coffee break' },
+    { text: 'Questioning existence' },
+    { text: 'Feeding the server hamsters' },
+    { text: 'Convincing electrons to move faster' },
+    { text: 'Asking ChatGPT for better loading messages' },
+    { text: 'Deflecting the inevitable stack overflow' },
+    { text: 'Turning it off and on again' },
+    { text: 'Playing rock-paper-scissors with the database' },
+    { text: 'Applying machine learning to this loading bar' },
+    { text: 'Sacrificing a byte to the coding gods' },
+    { text: 'Almost there... maybe... probably' },
+];
 
 const ResponsePanel: React.FC<ResponsePanelProps> = ({
     responseEditor,
@@ -37,16 +71,22 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
+    const timeTaken =
+        response?.execution_time_ms !== undefined
+            ? response.execution_time_ms < 1000
+                ? `${response.execution_time_ms} ms`
+                : `${(response.execution_time_ms / 1000).toFixed(2)} s`
+            : 'N/A';
     return (
         <div className="mt-2">
             <div className="flex justify-between items-center">
-                <div className="flex items-center mb-2">
+                <div className="flex items-center justify-center mb-2">
                     <p className="font-medium mr-4">Response</p>
                     <Select
                         value={responseType}
                         onValueChange={value => setResponseType(value as 'text' | 'json' | 'html')}
                     >
-                        <SelectTrigger className="w-[120px]">
+                        <SelectTrigger className="w-[120px] h-8">
                             <SelectValue placeholder="Format" />
                         </SelectTrigger>
                         <SelectContent>
@@ -56,28 +96,40 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
                         </SelectContent>
                     </Select>
                 </div>
-                {response && (
-                    <>
-                        <span
-                            className={`px-2 py-1 rounded text-xs font-medium ${getStatusClass(response.status_code)}`}
-                        >
-                            {response.status_code}
-                        </span>
-                        <span className="text-sm text-gray-600">
-                            {formatBytes(response.size_bytes)} • {response.execution_time_ms.toFixed(2)}ms
-                        </span>
-                    </>
-                )}
-                {error && <span className="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800">Error</span>}
+                <div className="flex gap-2 items-center">
+                    {response && (
+                        <>
+                            <span className="text-sm text-gray-600">
+                                <span
+                                    className={`px-2 py-1 rounded text-xs font-medium ${getStatusClass(response.status_code)}`}
+                                >
+                                    {response.status_code}
+                                </span>{' '}
+                                • {formatBytes(response.size_bytes)} • {timeTaken}ms
+                            </span>
+                        </>
+                    )}
+                    {error && (
+                        <span className="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800">Error</span>
+                    )}
+                </div>
             </div>
-            <CodeEditor
-                initialValue={response?.content || ''}
-                height="100%"
-                language={responseType === 'json' ? 'json' : 'text'}
-                onChange={value => responseEditor?.commands.setContent(value)}
-                readOnly={false}
-                theme="light"
-            />
+            <div className="min-h-[450px]">
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center gap-4">
+                        <MultiStepLoader loadingStates={loadingStates} loading={isLoading} duration={800} />
+                    </div>
+                ) : (
+                    <CodeEditor
+                        initialValue={response?.content || ''}
+                        height="100%"
+                        language={responseType === 'json' ? 'json' : 'text'}
+                        readOnly={false}
+                        theme="light"
+                    />
+                )}
+            </div>
+            c
         </div>
     );
 };

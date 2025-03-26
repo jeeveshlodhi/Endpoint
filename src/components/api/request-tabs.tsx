@@ -6,7 +6,6 @@ import HeadersPanel from './headers-panel';
 import BodyPanel from './body-panel';
 import ScriptsPanel from './scripts-panel';
 import SettingsPanel from './settings-panel';
-import { Editor } from '@tiptap/react';
 import { AuthConfigType, AuthType, BodyType, FormDataItemType, ParamItemType } from '@/types/api-types';
 
 interface RequestTabsProps {
@@ -33,7 +32,8 @@ interface RequestTabsProps {
     setGraphqlVariables: React.Dispatch<React.SetStateAction<string>>;
     selectedFile: File | null;
     setSelectedFile: React.Dispatch<React.SetStateAction<File | null>>;
-    bodyEditor: Editor | null;
+    bodyEditor: string;
+    setBodyEditor: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const RequestTabs: React.FC<RequestTabsProps> = (props: RequestTabsProps) => {
@@ -82,6 +82,7 @@ const RequestTabs: React.FC<RequestTabsProps> = (props: RequestTabsProps) => {
                     selectedFile={props.selectedFile}
                     setSelectedFile={props.setSelectedFile}
                     bodyEditor={props.bodyEditor}
+                    setBodyEditor={props.setBodyEditor}
                 />
             </TabsContent>
 

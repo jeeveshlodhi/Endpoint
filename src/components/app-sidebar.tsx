@@ -13,6 +13,7 @@ import {
 import { type NavItem } from '@/types';
 import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
+import { Link } from 'react-router';
 
 const mainNavItems: NavItem[] = [
     {
@@ -42,9 +43,9 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            {/* <Link href="/dashboard" prefetch> */}
-                            <AppLogo />
-                            {/* </Link> */}
+                            <Link to="/">
+                                <AppLogo />
+                            </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

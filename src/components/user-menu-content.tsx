@@ -7,6 +7,7 @@ import {
 import { UserInfo } from '@/components/user-info';
 import { type User } from '@/types';
 import { LogOut, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface UserMenuContentProps {
     user: User;
@@ -22,13 +23,15 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                <DropdownMenuItem asChild>
-                    <Settings className="mr-2" />
-                    Settings
+                <DropdownMenuItem>
+                    <Link to="settings">
+                        <Settings className="mr-2" />
+                        Settings
+                    </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
+            <DropdownMenuItem>
                 <LogOut className="mr-2" />
                 Log out
             </DropdownMenuItem>

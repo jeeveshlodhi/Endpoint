@@ -1,7 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useEditor, Editor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Code from '@tiptap/extension-code';
 import RequestBar from '../components/api/request-bar';
 import RequestTabs from '../components/api/request-tabs';
 import ResponsePanel from '../components/api/response-panel';
@@ -18,6 +15,7 @@ import {
     ResponseDataType,
     ResponseFormat,
 } from '@/types/api-types';
+import AppLayout from '@/layouts/app-layout';
 
 // Define interfaces for all the types
 
@@ -58,39 +56,22 @@ const ApiClient: React.FC = () => {
 
     // Response settings
     const [responseType, setResponseType] = useState<ResponseFormat>('json');
-
-    // Editors
-    const bodyEditor = useEditor({
-        extensions: [StarterKit, Code],
-        content: '',
-    });
-
-    const responseEditor = useEditor({
-        extensions: [StarterKit],
-        content: '',
-        editable: false,
-    });
+    const [responseContent, setResponseContent] = useState<string>('');
 
     // Update response editor content when response changes
     useEffect(() => {
-        if (response && responseEditor) {
+        if (response) {
             if (responseType === 'json') {
                 try {
-                    // For JSON response display, we'll show a formatted object with all response data
-                    const formattedJson = JSON.stringify(response, null, 2);
-                    responseEditor.commands.setContent(`<pre><code>${formattedJson}</code></pre>`);
+                    setResponseContent(JSON.stringify(response, null, 2));
                 } catch (e) {
-                    responseEditor.commands.setContent('<p>Invalid JSON response</p>');
+                    setResponseContent('Invalid JSON response');
                 }
-            } else if (responseType === 'html') {
-                // For HTML, we'll display the raw HTML content
-                responseEditor.commands.setContent(`<pre><code>${escapeHtml(response.content)}</code></pre>`);
             } else {
-                // For text, we'll display the content directly
-                responseEditor.commands.setContent(`<pre>${response.content}</pre>`);
+                setResponseContent(response.content || '');
             }
         }
-    }, [response, responseType, responseEditor]);
+    }, [response, responseType]);
 
     // Helper function to escape HTML for safe display
     const escapeHtml = (html: string): string => {
@@ -175,14 +156,14 @@ const ApiClient: React.FC = () => {
             return formDataObj;
         }
 
-        if (bodyType === 'raw' && bodyEditor) {
+        if (bodyType === 'raw' && responseContent) {
             try {
                 if (rawFormat === 'json') {
-                    return JSON.parse(bodyEditor.getText());
+                    return JSON.parse(responseContent);
                 }
-                return bodyEditor.getText();
+                return responseContent;
             } catch (e) {
-                return bodyEditor.getText();
+                return `Error parsing JSON: ${e}`;
             }
         }
 
@@ -299,69 +280,72 @@ const ApiClient: React.FC = () => {
     }, []);
 
     return (
-        <div className="w-full p-4 h-full flex flex-col" ref={containerRef}>
-            <RequestBar
-                method={method}
-                setMethod={setMethod}
-                url={url}
-                setUrl={setUrl}
-                onSendRequest={handleSendRequest}
-                params={params}
-                setParams={setParams}
-                // isLoading={isLoading}
-            />
+        <AppLayout>
+            <div className="w-full p-4 h-full flex flex-col" ref={containerRef}>
+                <RequestBar
+                    method={method}
+                    setMethod={setMethod}
+                    url={url}
+                    setUrl={setUrl}
+                    onSendRequest={handleSendRequest}
+                    params={params}
+                    setParams={setParams}
+                    // isLoading={isLoading}
+                />
 
-            <div className="flex flex-col flex-grow overflow-hidden">
-                {/* Request Tabs with controlled height */}
-                <div style={{ height: `${requestHeight}px`, overflow: 'auto' }}>
-                    <RequestTabs
-                        params={params}
-                        setParams={setParams}
-                        headers={headers}
-                        setHeaders={setHeaders}
-                        authType={authType}
-                        setAuthType={setAuthType}
-                        authConfig={authConfig}
-                        setAuthConfig={setAuthConfig}
-                        bodyType={bodyType}
-                        setBodyType={setBodyType}
-                        formData={formData}
-                        setFormData={setFormData}
-                        urlEncodedData={urlEncodedData}
-                        setUrlEncodedData={setUrlEncodedData}
-                        rawFormat={rawFormat}
-                        setRawFormat={setRawFormat}
-                        graphqlQuery={graphqlQuery}
-                        setGraphqlQuery={setGraphqlQuery}
-                        graphqlVariables={graphqlVariables}
-                        setGraphqlVariables={setGraphqlVariables}
-                        selectedFile={selectedFile}
-                        setSelectedFile={setSelectedFile}
-                        bodyEditor={bodyEditor}
-                    />
-                </div>
+                <div className="flex flex-col flex-grow overflow-hidden">
+                    {/* Request Tabs with controlled height */}
+                    <div style={{ height: `${requestHeight}px`, overflow: 'auto' }}>
+                        <RequestTabs
+                            params={params}
+                            setParams={setParams}
+                            headers={headers}
+                            setHeaders={setHeaders}
+                            authType={authType}
+                            setAuthType={setAuthType}
+                            authConfig={authConfig}
+                            setAuthConfig={setAuthConfig}
+                            bodyType={bodyType}
+                            setBodyType={setBodyType}
+                            formData={formData}
+                            setFormData={setFormData}
+                            urlEncodedData={urlEncodedData}
+                            setUrlEncodedData={setUrlEncodedData}
+                            rawFormat={rawFormat}
+                            setRawFormat={setRawFormat}
+                            graphqlQuery={graphqlQuery}
+                            setGraphqlQuery={setGraphqlQuery}
+                            graphqlVariables={graphqlVariables}
+                            setGraphqlVariables={setGraphqlVariables}
+                            selectedFile={selectedFile}
+                            setSelectedFile={setSelectedFile}
+                            bodyEditor={responseContent}
+                            setBodyEditor={setResponseContent}
+                        />
+                    </div>
 
-                {/* Resize handle */}
-                <div
-                    className="h-2 bg-gray-100 cursor-row-resize flex justify-center items-center"
-                    onMouseDown={handleMouseDown}
-                >
-                    <div className="w-12 h-1 bg-gray-400 rounded-full"></div>
-                </div>
+                    {/* Resize handle */}
+                    <div
+                        className="h-2 bg-gray-100 cursor-row-resize flex justify-center items-center"
+                        onMouseDown={handleMouseDown}
+                    >
+                        <div className="w-12 h-1 bg-gray-400 rounded-full"></div>
+                    </div>
 
-                {/* Response Panel with flexible height */}
-                <div className="flex-grow overflow-auto">
-                    <ResponsePanel
-                        responseEditor={responseEditor}
-                        responseType={responseType}
-                        setResponseType={setResponseType}
-                        response={response}
-                        error={error}
-                        isLoading={isLoading}
-                    />
+                    {/* Response Panel with flexible height */}
+                    <div className="flex-grow overflow-auto">
+                        <ResponsePanel
+                            responseEditor={responseContent}
+                            responseType={responseType}
+                            setResponseType={setResponseType}
+                            response={response}
+                            error={error}
+                            isLoading={isLoading}
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
+        </AppLayout>
     );
 };
 

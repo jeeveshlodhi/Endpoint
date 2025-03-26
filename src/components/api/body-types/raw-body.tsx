@@ -1,11 +1,11 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Editor, EditorContent } from '@tiptap/react';
+import CodeEditor from '@/components/general-components/editor';
 
 interface RawBodyProps {
     rawFormat: 'text' | 'json' | 'xml' | 'html' | 'javascript';
     setRawFormat: React.Dispatch<React.SetStateAction<'text' | 'json' | 'xml' | 'html' | 'javascript'>>;
-    bodyEditor: Editor | null;
+    bodyEditor: string | null;
 }
 
 const RawBody: React.FC<RawBodyProps> = ({ rawFormat, setRawFormat, bodyEditor }) => {
@@ -23,7 +23,13 @@ const RawBody: React.FC<RawBodyProps> = ({ rawFormat, setRawFormat, bodyEditor }
                     <SelectItem value="javascript">JavaScript</SelectItem>
                 </SelectContent>
             </Select>
-            <EditorContent editor={bodyEditor} className="min-h-[200px] border p-2 rounded" />
+            <CodeEditor
+                initialValue={bodyEditor || ''}
+                height="100%"
+                language={rawFormat === 'json' ? 'json' : 'text'}
+                readOnly={false}
+                theme="light"
+            />
         </div>
     );
 };

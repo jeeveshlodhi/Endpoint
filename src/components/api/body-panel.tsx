@@ -1,6 +1,5 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Editor } from '@tiptap/react';
 import FormDataBody from './body-types/form-data-body';
 import UrlEncodedBody from './body-types/url-encoded-body';
 import RawBody from './body-types/raw-body';
@@ -23,7 +22,8 @@ interface BodyPanelProps {
     setGraphqlVariables: React.Dispatch<React.SetStateAction<string>>;
     selectedFile: File | null;
     setSelectedFile: React.Dispatch<React.SetStateAction<File | null>>;
-    bodyEditor: Editor | null;
+    bodyEditor: string;
+    setBodyEditor: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const BodyPanel: React.FC<BodyPanelProps> = props => {

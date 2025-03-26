@@ -14,10 +14,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
-import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
+import { User, type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
+// Fix import from react-router-dom instead of react-router
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const mainNavItems: NavItem[] = [
     {
@@ -46,8 +48,21 @@ interface AppHeaderProps {
     breadcrumbs?: BreadcrumbItem[];
 }
 
+const guestUser: User = {
+    id: 0,
+    name: 'Guest User',
+    email: 'guest@example.com',
+    avatar: '/default-avatar.png',
+    email_verified_at: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+};
+
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const getInitials = useInitials();
+    const location = useLocation();
+    const navigate = useNavigate();
+
     return (
         <>
             <div className="border-sidebar-border/80 border-b">
@@ -72,11 +87,14 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                     <div className="flex h-full flex-col justify-between text-sm">
                                         <div className="flex flex-col space-y-4">
                                             {mainNavItems.map(item => (
-                                                <div>{item.title}</div>
-                                                // <Link key={item.title} href={item.url} className="flex items-center space-x-2 font-medium">
-                                                //     {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                                //     <span>{item.title}</span>
-                                                // </Link>
+                                                <Link
+                                                    key={item.title}
+                                                    to={item.url}
+                                                    className="flex items-center space-x-2 font-medium"
+                                                >
+                                                    {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
+                                                    <span>{item.title}</span>
+                                                </Link>
                                             ))}
                                         </div>
 
@@ -100,7 +118,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         </Sheet>
                     </div>
 
-                    <Link href="/dashboard" prefetch className="flex items-center space-x-2">
+                    <Link to="/dashboard" className="flex items-center space-x-2">
                         <AppLogo />
                     </Link>
 
@@ -111,17 +129,17 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 {mainNavItems.map((item, index) => (
                                     <NavigationMenuItem key={index} className="relative flex h-full items-center">
                                         <Link
-                                            href={item.url}
+                                            to={item.url}
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
-                                                page.url === item.url && activeItemStyles,
+                                                location.pathname === item.url && activeItemStyles,
                                                 'h-9 cursor-pointer px-3',
                                             )}
                                         >
                                             {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
                                             {item.title}
                                         </Link>
-                                        {page.url === item.url && (
+                                        {location.pathname === item.url && (
                                             <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
                                         )}
                                     </NavigationMenuItem>
@@ -167,15 +185,15 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="size-10 rounded-full p-1">
                                     <Avatar className="size-8 overflow-hidden rounded-full">
-                                        <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
+                                        <AvatarImage src="/default-avatar.png" alt="Guest User" />
                                         <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
-                                            {getInitials(auth.user.name)}
+                                            GU
                                         </AvatarFallback>
                                     </Avatar>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-56" align="end">
-                                <UserMenuContent user={auth.user} />
+                                <UserMenuContent user={guestUser} />
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>

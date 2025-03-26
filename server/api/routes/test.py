@@ -2,11 +2,12 @@ from fastapi import FastAPI, Body, Header, File, UploadFile, HTTPException, Resp
 from fastapi.responses import JSONResponse, HTMLResponse, PlainTextResponse, StreamingResponse, FileResponse
 from pydantic import BaseModel
 from typing import List, Dict, Optional, Any
+from fastapi import APIRouter
 import io
 import time
 import json
 
-app = FastAPI(title="API Tester Routes")
+router = APIRouter()
 
 # Basic models for request/response
 class Item(BaseModel):
@@ -22,11 +23,11 @@ class User(BaseModel):
     full_name: Optional[str] = None
 
 # Basic GET endpoints
-@app.get("/")
+@router.get("/")
 async def root():
     return {"message": "Welcome to the API Tester Routes"}
 
-@app.get("/items")
+@router.get("/items")
 async def get_items():
     return [
         {"id": 1, "name": "Item 1"},
@@ -35,14 +36,14 @@ async def get_items():
     ]
 
 # GET with path parameters
-@app.get("/items/{item_id}")
+@router.get("/items/{item_id}")
 async def get_item(item_id: int):
     if item_id == 404:
         raise HTTPException(status_code=404, detail="Item not found")
     return {"id": item_id, "name": f"Item {item_id}"}
 
 # GET with query parameters
-@app.get("/search")
+@router.get("/search")
 async def search_items(q: str, limit: int = 10, skip: int = 0):
     return {
         "query": q,
@@ -52,32 +53,32 @@ async def search_items(q: str, limit: int = 10, skip: int = 0):
     }
 
 # POST endpoints with JSON body
-@app.post("/items")
+@router.post("/items")
 async def create_item(item: Item):
     return {"item": item, "id": 1001}
 
 # PUT endpoint
-@app.put("/items/{item_id}")
+@router.put("/items/{item_id}")
 async def update_item(item_id: int, item: Item):
     return {"item_id": item_id, "updated_item": item}
 
 # DELETE endpoint
-@app.delete("/items/{item_id}")
+@router.delete("/items/{item_id}")
 async def delete_item(item_id: int):
     return {"deleted": True, "item_id": item_id}
 
 # PATCH endpoint
-@app.patch("/items/{item_id}")
+@router.patch("/items/{item_id}")
 async def partial_update(item_id: int, item: Dict[str, Any] = Body(...)):
     return {"item_id": item_id, "patched_fields": item}
 
 # Form data handling
-@app.post("/login")
+@router.post("/login")
 async def login(username: str = Form(...), password: str = Form(...)):
     return {"username": username, "logged_in": True}
 
 # File upload
-@app.post("/upload")
+@router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     contents = await file.read()
     return {
@@ -87,7 +88,7 @@ async def upload_file(file: UploadFile = File(...)):
     }
 
 # Multiple file uploads
-@app.post("/upload-multiple")
+@router.post("/upload-multiple")
 async def upload_multiple_files(files: List[UploadFile] = File(...)):
     return [
         {
@@ -98,7 +99,7 @@ async def upload_multiple_files(files: List[UploadFile] = File(...)):
     ]
 
 # Different response types
-@app.get("/html", response_class=HTMLResponse)
+@router.get("/html", response_class=HTMLResponse)
 async def get_html():
     return """
     <html>
@@ -112,12 +113,12 @@ async def get_html():
     </html>
     """
 
-@app.get("/text", response_class=PlainTextResponse)
+@router.get("/text", response_class=PlainTextResponse)
 async def get_text():
     return "This is a plain text response"
 
 # Streaming response
-@app.get("/stream")
+@router.get("/stream")
 async def get_stream():
     def generate():
         for i in range(10):
@@ -126,50 +127,52 @@ async def get_stream():
     return StreamingResponse(generate(), media_type="text/event-stream")
 
 # File download
-@app.get("/download")
+@router.get("/download")
 async def download_file():
     content = "This is a sample file for download testing"
-    return FileResponse(
-        io.BytesIO(content.encode()).read(),
+    stream = io.BytesIO(content.encode())
+
+    return StreamingResponse(
+        stream,
         media_type="text/plain",
-        filename="sample.txt"
+        headers={"Content-Disposition": f"attachment; filename=sample.txt"}
     )
 
 # Headers, cookies, and authentication tests
-@app.get("/headers")
+@router.get("/headers")
 async def get_headers(user_agent: Optional[str] = Header(None)):
     return {"User-Agent": user_agent}
 
-@app.get("/custom-header")
+@router.get("/custom-header")
 async def custom_header_response():
     content = {"message": "Custom header response"}
     headers = {"X-Custom-Header": "custom-value", "X-API-Key": "test-api-key"}
     return JSONResponse(content=content, headers=headers)
 
-@app.get("/cookies")
+@router.get("/cookies")
 async def get_cookies(test_cookie: Optional[str] = Cookie(None)):
     return {"test_cookie": test_cookie}
 
-@app.post("/set-cookie")
+@router.post("/set-cookie")
 async def set_cookie():
     response = JSONResponse(content={"message": "Cookie set"})
     response.set_cookie(key="test_cookie", value="cookie_value")
     return response
 
 # Authentication simulation
-@app.get("/auth")
+@router.get("/auth")
 async def auth_required(authorization: str = Header(...)):
     if authorization != "Bearer test-token":
         raise HTTPException(status_code=401, detail="Invalid token")
     return {"authorized": True}
 
 # Status codes
-@app.get("/status/{status_code}")
+@router.get("/status/{status_code}")
 async def status_code(status_code: int):
     return Response(status_code=status_code, content=f"Response with status code {status_code}")
 
 # Delayed response for timeout testing
-@app.get("/delay/{seconds}")
+@router.get("/delay/{seconds}")
 async def delayed_response(seconds: int):
     if seconds > 10:
         seconds = 10  # Cap at 10 seconds for safety
@@ -177,7 +180,7 @@ async def delayed_response(seconds: int):
     return {"message": f"Response after {seconds} seconds delay"}
 
 # Redirects
-@app.get("/redirect")
+@router.get("/redirect")
 async def redirect():
     return JSONResponse(
         status_code=302,
