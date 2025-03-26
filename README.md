@@ -2,6 +2,37 @@
 
 This template should help get you started developing with Tauri, React and Typescript in Vite.
 
+# Join Our Discord Community!
+
+🚀 **We're building something awesome together!** 🚀
+
+We invite you to join our Discord community for our open source project. Connect with fellow contributors, get help, share ideas, and collaborate on making this project even better.
+
+## How to Join
+
+[![Join our Discord server](https://img.shields.io/discord/YOUR_SERVER_ID?color=7289DA&logo=discord&logoColor=white&style=for-the-badge)](https://discord.gg/pMhTMcE3kS)
+
+Simply click the button above or use this invite link: [https://discord.gg/YOUR_INVITE_LINK](https://discord.gg/YOUR_INVITE_LINK)
+
+## Why Join?
+
+- 💬 Connect with other contributors
+- 🤝 Find collaboration opportunities
+- 🔍 Get help with issues
+- 💡 Share your ideas and feedback
+- 🎉 Be part of our growing community
+
+## Community Guidelines
+
+- Be respectful and inclusive
+- Help others when you can
+- Share knowledge freely
+- Have fun!
+
+We can't wait to see you there!
+
+---
+
 ## Recommended IDE Setup
 
 - [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
