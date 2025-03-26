@@ -12,7 +12,7 @@ We invite you to join our Discord community for our open source project. Connect
 
 [![Join our Discord server](https://img.shields.io/discord/YOUR_SERVER_ID?color=7289DA&logo=discord&logoColor=white&style=for-the-badge)](https://discord.gg/pMhTMcE3kS)
 
-Simply click the button above or use this invite link: [https://discord.gg/YOUR_INVITE_LINK](https://discord.gg/YOUR_INVITE_LINK)
+Simply click the button above or use this invite link: [https://discord.gg/pMhTMcE3kS](https://discord.gg/pMhTMcE3kS)
 
 ## Why Join?
 
