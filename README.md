@@ -2,7 +2,6 @@
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/jeeveshlodhi/Endpoint/refs/heads/master/src/assets/Endpoint.png" alt="Endpoint Logo" width="200" height="200" />
-  <Center><h1>Endpoint</h1></Center>
 </p>
 
 <p align="center">
@@ -335,7 +334,7 @@ If you find Endpoint useful, please consider:
 ## 📞 Contact
 
 For questions, feedback, or support:
-- Email: [support@endpointapp.io](mailto:support@endpointapp.io)
+- Email: [lodhijeevesh@gmail.com](mailto:lodhijeevesh@gmail.com)
 - Discord: [Join our server](https://discord.gg/pMhTMcE3kS)
 
 ---
