@@ -7,4 +7,4 @@ router = APIRouter()
 
 router.include_router(fetcher_router, tags=["fetcher"])
 router.include_router(health_check_router, tags=["health_check"])
-router.include_router(test_router, tags=["testzz"])
+router.include_router(test_router, tags=["test"])

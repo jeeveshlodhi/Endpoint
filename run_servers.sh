@@ -1,321 +1,279 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+# Enhanced server management script with simplified logging
+
+# ------- Configuration Section -------
+readonly MAX_LOG_LINES=1000
+readonly PYTHON_PORT=8000
+readonly SCRIPT_NAME=$(basename "$0")
+
+# ------- Initialization -------
 # Get the directory where the script is located
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly LOGS_DIR="${SCRIPT_DIR}/logs"
+readonly PID_FILE="${SCRIPT_DIR}/.server_pids"
+readonly TAURI_LOG="${LOGS_DIR}/tauri.log"
+readonly PYTHON_LOG="${LOGS_DIR}/python.log"
 
-# Create logs directory inside the script directory
-mkdir -p "$SCRIPT_DIR/logs"
-
-# Function to get timestamp
-timestamp() {
-  date +"%Y%m%d_%H%M%S"
-}
-
-# Function to get today's date in YYYY-MM-DD format
-get_date_for_filename() {
-  date +"%Y-%m-%d"
-}
-
-# Function to get full timestamp for log entries
+# ------- Helper Functions -------
 get_timestamp() {
   date +"%Y-%m-%d %H:%M:%S"
 }
 
-# Function to get or create the appropriate log file for today
-get_log_file() {
-  local server_name="$1"
-  local today_date=$(get_date_for_filename)
-  local log_file="$SCRIPT_DIR/logs/${today_date}-${server_name}.log"
+# Simplified logging function
+log_message() {
+  local log_file="$1"
+  local message="$2"
 
-  # Create the file if it doesn't exist
-  if [ ! -f "$log_file" ]; then
-    touch "$log_file"
-    echo "=== ${server_name} Server Log - Started at $(get_timestamp) ===" > "$log_file"
-  fi
+  # Create logs directory if it doesn't exist
+  mkdir -p "${LOGS_DIR}"
 
-  echo "$log_file"
+  local log_entry="$(get_timestamp) - ${message}"
+
+  # Log to file and trim if needed
+  echo "${log_entry}" >> "${log_file}"
+  trim_log "${log_file}"
+
+  # Also show message to console
+  echo "${log_entry}"
 }
 
-# Function to trim log files to last 1000 lines if needed
+# Function to trim log files
 trim_log() {
   local log_file="$1"
-  local max_lines=1000
+  local temp_file
 
-  if [ -f "$log_file" ]; then
-    # Count lines in the file
-    local line_count=$(wc -l < "$log_file")
+  if [[ -f "${log_file}" ]]; then
+    local line_count=$(wc -l < "${log_file}")
 
-    if [ "$line_count" -gt "$max_lines" ]; then
-      # Create a temporary file
-      local temp_file=$(mktemp)
-      # Get the last 1000 lines and save to temp file
-      tail -n "$max_lines" "$log_file" > "$temp_file"
-      # Replace original with trimmed version
-      mv "$temp_file" "$log_file"
-
-      # Add a note about trimming
-      echo "$(get_timestamp) - [Log Management] Trimmed file to last $max_lines lines" >> "$log_file"
-      echo "$(get_timestamp) - Trimmed $log_file to last $max_lines lines" >> "$(get_log_file "management")"
+    if [[ "${line_count}" -gt "${MAX_LOG_LINES}" ]]; then
+      temp_file=$(mktemp)
+      # Keep last MAX_LOG_LINES lines
+      tail -n "${MAX_LOG_LINES}" "${log_file}" > "${temp_file}"
+      mv "${temp_file}" "${log_file}"
     fi
   fi
 }
 
-# Function to log messages to both console and log file
-log_message() {
-  local server_name="$1"
-  local message="$2"
-  local log_file=$(get_log_file "$server_name")
-
-  echo "$(get_timestamp) - $message" | tee -a "$log_file"
+# Function to check if a process is running
+is_process_running() {
+  local pid="$1"
+  if [[ -z "${pid}" ]]; then
+    return 1
+  fi
+  if ps -p "${pid}" > /dev/null 2>&1; then
+    return 0
+  else
+    return 1
+  fi
 }
 
-# Start the Tauri app
-start_tauri() {
-  log_message "tauri" "Starting Tauri server..."
+# Function to verify port availability
+is_port_available() {
+  local port="$1"
+  if command -v lsof > /dev/null 2>&1; then
+    if lsof -i :"${port}" > /dev/null 2>&1; then
+      return 1
+    else
+      return 0
+    fi
+  else
+    # Fallback using netstat if lsof not available
+    if netstat -tuln | grep -q ":${port} "; then
+      return 1
+    else
+      return 0
+    fi
+  fi
+}
 
-  # Check if the directory exists
-  if [ ! -d "$SCRIPT_DIR/" ]; then
-    log_message "tauri" "ERROR: Tauri app directory not found at $SCRIPT_DIR/tauri-app"
-    log_message "tauri" "Skipping Tauri server startup"
-    TAURI_PID=""
+# ------- Server Management Functions -------
+start_tauri() {
+  log_message "${TAURI_LOG}" "Starting Tauri server..."
+
+  if [[ ! -d "${SCRIPT_DIR}" ]]; then
+    log_message "${TAURI_LOG}" "ERROR: Tauri app directory not found at ${SCRIPT_DIR}"
     return 1
   fi
 
-  if [ ! -d "$SCRIPT_DIR/node_modules" ]; then
-    log_message "tauri" "Node modules directory not found at $SCRIPT_DIR/node_modules"
-    log_message "tauri" "Installing node modules..."
-    npm install >> "$(get_log_file "tauri")" 2>&1
-    if [ $? -ne 0 ]; then
-      log_message "tauri" "ERROR: Failed to install node modules"
-      TAURI_PID=""
+  # Check for node_modules
+  if [[ ! -d "${SCRIPT_DIR}/node_modules" ]]; then
+    log_message "${TAURI_LOG}" "Node modules not found. Installing dependencies..."
+    if ! npm install >> "${TAURI_LOG}" 2>&1; then
+      log_message "${TAURI_LOG}" "ERROR: Failed to install node modules"
       return 1
     fi
   fi
 
-  cd "$SCRIPT_DIR/" || return 1
-  log_message "tauri" "Starting Tauri from directory: $(pwd)"
+  cd "${SCRIPT_DIR}" || return 1
+  log_message "${TAURI_LOG}" "Working directory: $(pwd)"
 
-  # Get the log file for today
-  TAURI_LOG=$(get_log_file "tauri")
+  # Start Tauri in development mode
+  log_message "${TAURI_LOG}" "Executing 'npm run tauri dev'"
+  npm run tauri dev >> "${TAURI_LOG}" 2>&1 &
+  local pid=$!
 
-  # Start the Tauri app and append output to the log file
-  log_message "tauri" "Executing 'npm run tauri dev'..."
-  npm run tauri dev >> "$TAURI_LOG" 2>&1 &
-  TAURI_PID=$!
-
-  log_message "tauri" "Tauri server started with PID: $TAURI_PID"
-
-  # Check if process is running after a brief moment
+  # Wait briefly to check if process started
   sleep 2
-  if ! ps -p $TAURI_PID > /dev/null; then
-    log_message "tauri" "WARNING: Tauri server may have failed to start. Check logs."
-    TAURI_PID=""
+  if is_process_running "${pid}"; then
+    log_message "${TAURI_LOG}" "Tauri server started with PID: ${pid}"
+    echo "TAURI_PID=${pid}" >> "${PID_FILE}"
+    return 0
+  else
+    log_message "${TAURI_LOG}" "ERROR: Tauri server failed to start"
+    log_message "${TAURI_LOG}" "Last 10 lines of log:"
+    tail -n 10 "${TAURI_LOG}" | while read -r line; do
+      log_message "${TAURI_LOG}" "${line}"
+    done
     return 1
   fi
-
-  # Trim log if it gets too large
-  trim_log "$TAURI_LOG"
-
-  cd "$SCRIPT_DIR" || exit 1
 }
 
-# Start the Python server
 start_python() {
-  log_message "python" "Starting Python server..."
+  local server_dir="${SCRIPT_DIR}/server"
 
-  # Check if we have Python installed
-  if ! command -v python3 &> /dev/null; then
-    echo "Error: Python3 is not installed or not in PATH"
-    PYTHON_PID=""
+  log_message "${PYTHON_LOG}" "Starting Python server..."
+
+  # Verify Python is available
+  if ! command -v python3 > /dev/null 2>&1; then
+    log_message "${PYTHON_LOG}" "ERROR: Python3 is not installed or not in PATH"
     return 1
   fi
 
-  # Default to current directory if server directory doesn't exist
-  if [ ! -d "$SCRIPT_DIR/server" ]; then
-    echo "Notice: Python server directory not found at $SCRIPT_DIR/server"
-    echo "Creating server directory..."
-    mkdir -p "$SCRIPT_DIR/server"
+  # Check port availability
+  if ! is_port_available "${PYTHON_PORT}"; then
+    log_message "${PYTHON_LOG}" "ERROR: Port ${PYTHON_PORT} is already in use"
+    return 1
   fi
 
-  SERVER_DIR="$SCRIPT_DIR/server"
-  cd "$SERVER_DIR" || exit 1
-  echo "Starting Python server from $(pwd)..."
-
-  # Check if main.py exists, if not create it
-  if [ ! -f "main.py" ]; then
-    echo "Error: main.py not found in $(pwd)"
-    echo "Creating a basic FastAPI application..."
-    cat > main.py << 'EOL'
-from fastapi import FastAPI
-
-app = FastAPI()
-
-@app.get("/")
-def read_root():
-    return {"message": "API Server is running"}
-
-@app.get("/api/health")
-def health_check():
-    return {"status": "healthy"}
-EOL
-    echo "Created main.py with a basic FastAPI application"
+  # Create server directory if needed
+  if [[ ! -d "${server_dir}" ]]; then
+    log_message "${PYTHON_LOG}" "Creating server directory at ${server_dir}"
+    mkdir -p "${server_dir}"
   fi
 
-  # Define log file with timestamp in name
-  PYTHON_LOG="$SCRIPT_DIR/logs/python_console_$(timestamp).log"
+  cd "${server_dir}" || return 1
+  log_message "${PYTHON_LOG}" "Working directory: $(pwd)"
 
-  # Add header with timestamp to log file
-  echo "=== Python Server Log - Started at $(date) ===" > "$PYTHON_LOG"
+  # Set up virtual environment
+  if [[ ! -d "venv" ]]; then
+    log_message "${PYTHON_LOG}" "Creating Python virtual environment..."
+    if ! python3 -m venv venv >> "${PYTHON_LOG}" 2>&1; then
+      log_message "${PYTHON_LOG}" "ERROR: Failed to create virtual environment"
+      return 1
+    fi
+  fi
 
-  # Create and activate virtual environment if needed
-  if [ ! -d "venv" ]; then
-      log_message "python" "Creating Python virtual environment..."
-      python3 -m venv venv >> "$PYTHON_LOG" 2>&1
+  # Activate virtual environment
+  source venv/bin/activate
+  log_message "${PYTHON_LOG}" "Virtual environment activated"
 
-      if [ $? -ne 0 ]; then
-        log_message "python" "Failed to create virtual environment. Attempting to install globally..."
-        pip3 install fastapi uvicorn >> "$PYTHON_LOG" 2>&1
+  # Install dependencies
+  if [[ -f "requirements.txt" ]]; then
+    log_message "${PYTHON_LOG}" "Installing dependencies from requirements.txt..."
+    if ! pip install -r requirements.txt >> "${PYTHON_LOG}" 2>&1; then
+      log_message "${PYTHON_LOG}" "ERROR: Failed to install dependencies from requirements.txt"
+      return 1
+    fi
+  else
+    log_message "${PYTHON_LOG}" "WARNING: requirements.txt not found. Installing default packages..."
+    if ! pip install fastapi uvicorn psutil >> "${PYTHON_LOG}" 2>&1; then
+      log_message "${PYTHON_LOG}" "ERROR: Failed to install default packages"
+      return 1
+    fi
+  fi
 
-        if [ $? -ne 0 ]; then
-          log_message "python" "ERROR: Failed to install dependencies. Check if pip is installed."
-          PYTHON_PID=""
-          return 1
-        fi
+  # Start FastAPI server
+  log_message "${PYTHON_LOG}" "Starting FastAPI server on port ${PYTHON_PORT}..."
+  python3 -m uvicorn main:app --reload --host 0.0.0.0 --port "${PYTHON_PORT}" >> "${PYTHON_LOG}" 2>&1 &
+  local pid=$!
+
+  # Give server time to start
+  sleep 5
+
+  if is_process_running "${pid}"; then
+    log_message "${PYTHON_LOG}" "Python server started with PID: ${pid}"
+    echo "PYTHON_PID=${pid}" >> "${PID_FILE}"
+
+    # Verify server is responding
+    if command -v curl > /dev/null 2>&1; then
+      log_message "${PYTHON_LOG}" "Testing server health endpoint..."
+      if curl -s --max-time 5 "http://localhost:${PYTHON_PORT}/api/health" > /dev/null; then
+        log_message "${PYTHON_LOG}" "✅ Server is responding correctly"
       else
-        source venv/bin/activate
-        log_message "python" "Installing FastAPI and Uvicorn..."
-        pip install fastapi uvicorn >> "$PYTHON_LOG" 2>&1
+        log_message "${PYTHON_LOG}" "⚠️ Server process is running but not responding to HTTP requests"
       fi
-    else
-      source venv/bin/activate
-      log_message "python" "Activated virtual environment"
+    fi
+    return 0
+  else
+    log_message "${PYTHON_LOG}" "ERROR: Python server failed to start"
+    log_message "${PYTHON_LOG}" "Last 10 lines of log:"
+    tail -n 10 "${PYTHON_LOG}" | while read -r line; do
+      log_message "${PYTHON_LOG}" "${line}"
+    done
+    return 1
+  fi
+}
+
+# ------- Main Process -------
+main() {
+  # Initialize PID file
+  > "${PID_FILE}"
+
+  # Create logs directory
+  mkdir -p "${LOGS_DIR}"
+
+  # Initialize log files
+  > "${TAURI_LOG}"
+  > "${PYTHON_LOG}"
+
+  # Start servers
+  start_python
+  start_tauri
+
+  # Display status information
+  echo "┌────────────────────────────────────────────┐"
+  echo "│ Servers are now running!                   │"
+  if grep -q "PYTHON_PID" "${PID_FILE}"; then
+    echo "│ • FastAPI server: http://localhost:${PYTHON_PORT}    │"
+  fi
+  echo "│                                            │"
+  echo "│ • Tauri logs: ${TAURI_LOG}    │"
+  echo "│ • Python logs: ${PYTHON_LOG}  │"
+  echo "│ • Run ./stop_servers.sh to stop servers    │"
+  echo "└────────────────────────────────────────────┘"
+
+  # Cleanup function
+  cleanup() {
+    log_message "${PYTHON_LOG}" "Shutting down servers..."
+
+    # Read PIDs from file
+    source "${PID_FILE}" 2> /dev/null || true
+
+    # Kill processes if they're running
+    if is_process_running "${PYTHON_PID}"; then
+      kill "${PYTHON_PID}" 2>/dev/null
     fi
 
-    # Run the Python server with explicit path specification
-      log_message "python" "Starting FastAPI server with uvicorn..."
-      python3 -m uvicorn main:app --reload --host 0.0.0.0 --port 8000 >> "$PYTHON_LOG" 2>&1 &
-      PYTHON_PID=$!
+    if is_process_running "${TAURI_PID}"; then
+      kill "${TAURI_PID}" 2>/dev/null
+    fi
 
-      log_message "python" "Python server started with PID: $PYTHON_PID"
+    # Remove PID file
+    rm -f "${PID_FILE}"
 
-      # Verify server is running
-      sleep 5  # Give it more time to start
-      if ! ps -p $PYTHON_PID > /dev/null; then
-        log_message "python" "WARNING: Python server failed to start."
-        # Output last 10 lines of log to help debugging
-        log_message "python" "Last few lines of server log:"
-        tail -n 10 "$PYTHON_LOG" | while read line; do
-          log_message "python" "  | $line"
-        done
-        PYTHON_PID=""
-        return 1
-      else
-        log_message "python" "FastAPI server successfully started at http://localhost:8000"
+    log_message "${PYTHON_LOG}" "Servers shut down complete"
+    exit 0
+  }
 
-        # Check if the server is actually responding
-        sleep 2
-        if command -v curl &> /dev/null; then
-          log_message "python" "Testing server response..."
-          if curl -s --max-time 5 http://localhost:8000/api/health > /dev/null; then
-            log_message "python" "✅ Server is responding correctly"
-          else
-            log_message "python" "⚠️ Server process is running but not responding to HTTP requests"
-          fi
-        fi
-      fi
+  # Trap signals
+  trap cleanup INT TERM EXIT
 
-  # Trim log if it gets too large
-  trim_log "$PYTHON_LOG"
-
-  cd "$SCRIPT_DIR" || exit 1
-}
-
-# Create a log rotation function that runs periodically in the background
-log_rotation() {
-  log_message "management" "Starting log rotation service"
-
+  # Wait indefinitely until interrupted
   while true; do
-    # Find all log files and trim them if needed
-    log_message "management" "Checking logs for rotation..."
-    find "$SCRIPT_DIR/logs" -type f -name "*.log" | while read -r log_file; do
-      trim_log "$log_file"
-    done
-
-    # Check for old log files (older than 30 days)
-    log_message "management" "Checking for old log files..."
-    find "$SCRIPT_DIR/logs" -type f -name "*.log" -mtime +30 | while read -r old_log; do
-      log_message "management" "Archiving old log: $(basename "$old_log")"
-
-      # Create archives directory if it doesn't exist
-      mkdir -p "$SCRIPT_DIR/logs/archives"
-
-      # Compress and move to archives
-      gzip -c "$old_log" > "$SCRIPT_DIR/logs/archives/$(basename "$old_log").gz"
-      rm "$old_log"
-
-      log_message "management" "Archived and removed: $(basename "$old_log")"
-    done
-
-    # Sleep for 1 hour before checking again
-    sleep 3600
+    sleep 3600 & wait $!
   done
 }
 
-# Start log rotation in the background
-log_rotation &
-LOG_ROTATION_PID=$!
-
-# Save PIDs to file for later use by stop script
-echo "LOG_ROTATION_PID=$LOG_ROTATION_PID" > "$SCRIPT_DIR/.server_pids"
-
-# Start the servers
-echo "Checking server directories..."
-TAURI_PID=""
-PYTHON_PID=""
-
-# Start both servers if directories exist
-start_tauri
-start_python
-
-# Update PID file with actual PIDs
-if [ -n "$TAURI_PID" ]; then
-  echo "TAURI_PID=$TAURI_PID" >> "$SCRIPT_DIR/.server_pids"
-else
-  echo "TAURI_PID=" >> "$SCRIPT_DIR/.server_pids"
-fi
-
-if [ -n "$PYTHON_PID" ]; then
-  echo "PYTHON_PID=$PYTHON_PID" >> "$SCRIPT_DIR/.server_pids"
-else
-  echo "PYTHON_PID=" >> "$SCRIPT_DIR/.server_pids"
-fi
-
-echo "┌────────────────────────────────────────────┐"
-echo "│ Servers are now running!                   │"
-if [ -n "$PYTHON_PID" ]; then
-echo "│ • FastAPI server: http://localhost:8000    │"
-fi
-echo "│                                            │"
-echo "│ • Check logs directory for output files    │"
-echo "│ • Run ./monitor_logs.sh to watch logs      │"
-echo "│ • Run ./stop_servers.sh to stop servers    │"
-echo "└────────────────────────────────────────────┘"
-
-# Define a cleanup function
-cleanup() {
-  echo "Shutting down servers..."
-  if [ -n "$TAURI_PID" ]; then
-    kill "$TAURI_PID" 2>/dev/null || true
-  fi
-  if [ -n "$PYTHON_PID" ]; then
-    kill "$PYTHON_PID" 2>/dev/null || true
-  fi
-  kill "$LOG_ROTATION_PID" 2>/dev/null || true
-  exit 0
-}
-
-# Register the cleanup function on INT and TERM signals
-trap cleanup INT TERM
-
-# Wait for all processes to finish
-wait
+# Start the main function
+main

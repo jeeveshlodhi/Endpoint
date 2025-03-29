@@ -6,3 +6,4 @@ passlib[bcrypt]>=1.7.4
 python-multipart>=0.0.5
 httpx==0.24.1
 pydantic-settings==2.0.3
+psutil
