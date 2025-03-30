@@ -45,7 +45,7 @@ const WindowControls = () => {
                     </button>
                 </div>
             )}
-            <div className="text-sm font-semibold">App Title</div>
+            <div className="text-sm font-semibold">Endpoint</div>
             {!mac && (
                 <div className="flex gap-2">
                     <button onClick={handleMinimize} className="hover:bg-gray-700 p-1 rounded">

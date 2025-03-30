@@ -3,6 +3,8 @@ import RequestBar from '../components/api/request-bar';
 import RequestTabs from '../components/api/request-tabs';
 import ResponsePanel from '../components/api/response-panel';
 import axios, { AxiosError } from 'axios';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+
 import {
     AuthConfigType,
     AuthType,
@@ -16,6 +18,8 @@ import {
     ResponseFormat,
 } from '@/types/api-types';
 import AppLayout from '@/layouts/app-layout';
+import { useKeybinding } from '@/lib/utils';
+import { platform } from '@tauri-apps/plugin-os';
 
 // Define interfaces for all the types
 
@@ -58,6 +62,8 @@ const ApiClient: React.FC = () => {
     const [responseType, setResponseType] = useState<ResponseFormat>('json');
     const [responseContent, setResponseContent] = useState<string>('');
 
+    const currentPlatform = platform();
+
     // Update response editor content when response changes
     useEffect(() => {
         if (response) {
@@ -73,6 +79,61 @@ const ApiClient: React.FC = () => {
         }
     }, [response, responseType]);
 
+    useEffect(() => {
+        if (url) {
+            try {
+                const urlObj = new URL(url);
+                const paramsObj = Array.from(new URLSearchParams(urlObj.search).entries());
+
+                setParams(prevParams => {
+                    const newParams = paramsObj.map(([key, value], index) => {
+                        const existingParam = prevParams[index];
+                        return {
+                            key,
+                            value,
+                            description: existingParam?.description || '',
+                            checked: true, // Automatically check params from URL
+                        };
+                    });
+
+                    // Keep any existing params beyond the ones in the URL
+                    const remainingParams = prevParams.slice(paramsObj.length);
+                    const paramsUpdated = [...newParams, ...remainingParams];
+                    if (paramsUpdated.length === 0 || paramsUpdated[paramsUpdated.length - 1].key !== '') {
+                        paramsUpdated.push({ key: '', value: '', description: '', checked: false });
+                    }
+
+                    return paramsUpdated;
+                });
+            } catch (error) {
+                console.error('Invalid URL:', error);
+            }
+        }
+    }, [url]);
+
+    useEffect(() => {
+        if (!url || !url.startsWith('http')) return; // Ensure URL is valid before processing
+
+        try {
+            console.log(url);
+            const urlObj = new URL(url);
+
+            let newUrl = `${urlObj.origin}${urlObj.pathname}`;
+
+            params.forEach(({ key, value, checked }, index) => {
+                if (checked && value.trim()) {
+                    newUrl += `${index === 0 ? '?' : '&'}${key}=${encodeURIComponent(value)}`;
+                }
+            });
+
+            if (decodeURIComponent(newUrl) !== decodeURIComponent(url)) {
+                setUrl(newUrl);
+            }
+        } catch (error) {
+            console.error('Invalid URL:', error);
+        }
+    }, [params]);
+
     // Helper function to escape HTML for safe display
     const escapeHtml = (html: string): string => {
         return html
@@ -85,9 +146,7 @@ const ApiClient: React.FC = () => {
 
     // Resizing state
     const [requestHeight, setRequestHeight] = useState(350); // Initial height
-    const isDraggingRef = useRef(false);
     const containerRef = useRef<HTMLDivElement>(null);
-    const lastPositionRef = useRef(0);
 
     const buildRequestHeaders = (): Record<string, string> => {
         const requestHeaders: Record<string, string> = {};
@@ -227,113 +286,56 @@ const ApiClient: React.FC = () => {
         }
     };
 
-    // Mouse down event handler for the resize handle
-    const handleMouseDown = (e: React.MouseEvent): void => {
-        isDraggingRef.current = true;
-        lastPositionRef.current = e.clientY;
-        document.body.style.cursor = 'row-resize';
-        document.body.style.userSelect = 'none';
-
-        // Add these event listeners only when dragging starts
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-    };
-
-    // Mouse move handler for resizing
-    const handleMouseMove = (e: MouseEvent): void => {
-        if (!isDraggingRef.current) return;
-
-        const delta = e.clientY - lastPositionRef.current;
-        lastPositionRef.current = e.clientY;
-
-        setRequestHeight(prevHeight => {
-            // Calculate the new height
-            const newHeight = prevHeight + delta;
-
-            // Set minimum and maximum heights
-            if (newHeight < 100) return 100;
-            if (containerRef.current && newHeight > containerRef.current.clientHeight - 100) {
-                return containerRef.current.clientHeight - 100;
-            }
-
-            return newHeight;
-        });
-    };
-
-    // Mouse up handler to stop resizing
-    const handleMouseUp = (): void => {
-        isDraggingRef.current = false;
-        document.body.style.cursor = '';
-        document.body.style.userSelect = '';
-
-        // Remove event listeners when dragging stops
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    // Clean up event listeners when component unmounts
-    useEffect(() => {
-        return () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-        };
-    }, []);
+    useKeybinding(currentPlatform == 'macos' ? 'Cmd+ENTER' : 'Ctrl+ENTER', e => {
+        e.preventDefault();
+        // console.log('Keybinding triggered');
+        handleSendRequest();
+    });
 
     return (
         <AppLayout>
-            <div className="w-full p-4 h-full flex flex-col" ref={containerRef}>
-                <RequestBar
-                    method={method}
-                    setMethod={setMethod}
-                    url={url}
-                    setUrl={setUrl}
-                    onSendRequest={handleSendRequest}
-                    params={params}
-                    setParams={setParams}
-                    // isLoading={isLoading}
-                />
-
-                <div className="flex flex-col flex-grow overflow-hidden">
-                    {/* Request Tabs with controlled height */}
-                    <div style={{ height: `${requestHeight}px`, overflow: 'auto' }}>
-                        <RequestTabs
-                            params={params}
-                            setParams={setParams}
-                            headers={headers}
-                            setHeaders={setHeaders}
-                            authType={authType}
-                            setAuthType={setAuthType}
-                            authConfig={authConfig}
-                            setAuthConfig={setAuthConfig}
-                            bodyType={bodyType}
-                            setBodyType={setBodyType}
-                            formData={formData}
-                            setFormData={setFormData}
-                            urlEncodedData={urlEncodedData}
-                            setUrlEncodedData={setUrlEncodedData}
-                            rawFormat={rawFormat}
-                            setRawFormat={setRawFormat}
-                            graphqlQuery={graphqlQuery}
-                            setGraphqlQuery={setGraphqlQuery}
-                            graphqlVariables={graphqlVariables}
-                            setGraphqlVariables={setGraphqlVariables}
-                            selectedFile={selectedFile}
-                            setSelectedFile={setSelectedFile}
-                            bodyEditor={responseContent}
-                            setBodyEditor={setResponseContent}
-                        />
-                    </div>
-
-                    {/* Resize handle */}
-                    <div
-                        className="h-2 bg-gray-100 cursor-row-resize flex justify-center items-center"
-                        onMouseDown={handleMouseDown}
-                    >
-                        <div className="w-12 h-1 bg-gray-400 rounded-full"></div>
-                    </div>
-
-                    {/* Response Panel with flexible height */}
-                    <div className="flex-grow overflow-auto">
+            <RequestBar
+                method={method}
+                setMethod={setMethod}
+                url={url}
+                setUrl={setUrl}
+                onSendRequest={handleSendRequest}
+                params={params}
+                setParams={setParams}
+                // isLoading={isLoading}
+            />
+            <ResizablePanelGroup direction="vertical">
+                <ResizablePanel defaultSize={25} className="p-2">
+                    <RequestTabs
+                        params={params}
+                        setParams={setParams}
+                        headers={headers}
+                        setHeaders={setHeaders}
+                        authType={authType}
+                        setAuthType={setAuthType}
+                        authConfig={authConfig}
+                        setAuthConfig={setAuthConfig}
+                        bodyType={bodyType}
+                        setBodyType={setBodyType}
+                        formData={formData}
+                        setFormData={setFormData}
+                        urlEncodedData={urlEncodedData}
+                        setUrlEncodedData={setUrlEncodedData}
+                        rawFormat={rawFormat}
+                        setRawFormat={setRawFormat}
+                        graphqlQuery={graphqlQuery}
+                        setGraphqlQuery={setGraphqlQuery}
+                        graphqlVariables={graphqlVariables}
+                        setGraphqlVariables={setGraphqlVariables}
+                        selectedFile={selectedFile}
+                        setSelectedFile={setSelectedFile}
+                        bodyEditor={responseContent}
+                        setBodyEditor={setResponseContent}
+                    />
+                </ResizablePanel>
+                <ResizableHandle withHandle />
+                <ResizablePanel defaultSize={75}>
+                    <div className="flex-grow overflow-auto p-2">
                         <ResponsePanel
                             responseEditor={responseContent}
                             responseType={responseType}
@@ -343,8 +345,8 @@ const ApiClient: React.FC = () => {
                             isLoading={isLoading}
                         />
                     </div>
-                </div>
-            </div>
+                </ResizablePanel>
+            </ResizablePanelGroup>
         </AppLayout>
     );
 };

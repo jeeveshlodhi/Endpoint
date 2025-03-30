@@ -43,6 +43,7 @@ async def get_item(item_id: int):
     return {"id": item_id, "name": f"Item {item_id}"}
 
 # GET with query parameters
+# http://localhost:8000/api/search?q=“hello"
 @router.get("/search")
 async def search_items(q: str, limit: int = 10, skip: int = 0):
     return {

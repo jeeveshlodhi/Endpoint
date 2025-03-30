@@ -3,6 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ParamItemType } from '@/types/api-types';
+import { CommandIcon } from 'lucide-react';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
@@ -43,7 +44,9 @@ const RequestBar: React.FC<RequestBarProps> = ({ method, setMethod, url, setUrl,
                     onChange={handleUrlInputChange}
                     className="flex-grow"
                 />
-                <Button onClick={onSendRequest}>Send</Button>
+                <Button onClick={onSendRequest}>
+                    Send (<CommandIcon /> Enter)
+                </Button>
             </div>
         </div>
     );

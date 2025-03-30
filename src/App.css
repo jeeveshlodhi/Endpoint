@@ -135,3 +135,12 @@
         @apply bg-background text-foreground;
     }
 }
+
+body {
+    user-select: none;
+}
+
+input,
+textarea {
+    user-select: text;
+}
