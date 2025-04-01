@@ -260,7 +260,7 @@ const ApiClient: React.FC = () => {
         setIsLoading(true);
         setError(null);
         setResponse(null);
-
+        if (!url) return;
         const formattedUrl = formatUrl(url);
 
         // Create the request payload
@@ -294,16 +294,18 @@ const ApiClient: React.FC = () => {
 
     return (
         <AppLayout>
-            <RequestBar
-                method={method}
-                setMethod={setMethod}
-                url={url}
-                setUrl={setUrl}
-                onSendRequest={handleSendRequest}
-                params={params}
-                setParams={setParams}
-                // isLoading={isLoading}
-            />
+            <div className="px-2">
+                <RequestBar
+                    method={method}
+                    setMethod={setMethod}
+                    url={url}
+                    setUrl={setUrl}
+                    onSendRequest={handleSendRequest}
+                    params={params}
+                    setParams={setParams}
+                    // isLoading={isLoading}
+                />
+            </div>
             <ResizablePanelGroup direction="vertical">
                 <ResizablePanel defaultSize={25} className="p-2">
                     <RequestTabs

@@ -59,9 +59,7 @@ const guestUser: User = {
 };
 
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
-    const getInitials = useInitials();
     const location = useLocation();
-    const navigate = useNavigate();
 
     return (
         <>

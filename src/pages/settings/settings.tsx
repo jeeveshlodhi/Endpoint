@@ -1,9 +1,11 @@
+import AppLayout from '@/layouts/app-layout';
+
 const Settings = () => {
     return (
-        <div>
+        <AppLayout>
             <h1>Settings</h1>
             <p>Coming soon...</p>
-        </div>
+        </AppLayout>
     );
 };
 

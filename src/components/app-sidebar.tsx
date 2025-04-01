@@ -55,13 +55,13 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-            <SidebarContent className="flex-1 overflow-auto">
+            {/* <SidebarContent className="flex-1 overflow-auto">
                 <NavMain items={mainNavItems} />
-            </SidebarContent>
-            <SidebarFooter className="shrink-0">
+            </SidebarContent> */}
+            {/* <SidebarFooter className="shrink-0">
                 <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
-            </SidebarFooter>
+            </SidebarFooter> */}
         </Sidebar>
     );
 }

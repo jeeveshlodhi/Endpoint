@@ -24,7 +24,7 @@ export function NavUser() {
         <SidebarMenu>
             <SidebarMenuItem>
                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                    <DropdownMenuTrigger className="w-full">
                         <SidebarMenuButton
                             size="lg"
                             className="text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent group"
@@ -33,11 +33,8 @@ export function NavUser() {
                             <ChevronsUpDown className="ml-auto size-4" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-                        align="end"
-                        side={isMobile ? 'bottom' : state === 'collapsed' ? 'left' : 'bottom'}
-                    >
+
+                    <DropdownMenuContent side="top">
                         <UserMenuContent user={user} />
                     </DropdownMenuContent>
                 </DropdownMenu>
