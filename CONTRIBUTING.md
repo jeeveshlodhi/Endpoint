@@ -146,7 +146,7 @@ To run tests:
 Join our community to get help, share ideas, and collaborate:
 
 - [Discord Server](https://discord.gg/pMhTMcE3kS)
-- [GitHub Discussions](https://github.com/ORIGINAL_OWNER/api_tester/discussions)
+- [GitHub Discussions](https://github.com/lodhijeevesh/endpoint/discussions)
 
 We look forward to your contributions!
 

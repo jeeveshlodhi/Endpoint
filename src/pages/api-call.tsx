@@ -274,9 +274,9 @@ const ApiClient: React.FC = () => {
         };
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/api/fetch', requestData);
+            const response = await axios.post('http://127.0.0.1:3030/api/fetch', requestData);
             setResponse(response.data);
-            console.log('Response:', response.data);
+            console.log('Response:', response);
         } catch (error) {
             const axiosError = error as AxiosError;
             console.error('Error details:', axiosError.response?.data || axiosError.message);
