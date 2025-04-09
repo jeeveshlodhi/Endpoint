@@ -5,7 +5,6 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ChevronDown, Maximize, Minimize, X } from 'lucide-react';
 import { Avatar, AvatarImage } from './ui/avatar';
-import { useInitials } from '@/hooks/use-initials';
 import { UserMenuContent } from './user-menu-content';
 import { User } from '@/types';
 import { AvatarFallback } from '@radix-ui/react-avatar';

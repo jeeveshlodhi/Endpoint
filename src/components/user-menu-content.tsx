@@ -8,7 +8,6 @@ import { UserInfo } from '@/components/user-info';
 import useUIStore from '@/store/useUIStore';
 import { type User } from '@/types';
 import { LogOut, Settings } from 'lucide-react';
-import { Link } from 'react-router';
 
 interface UserMenuContentProps {
     user: User;
@@ -25,7 +24,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                <DropdownMenuItem asChild onClick={openModal}>
+                <DropdownMenuItem onClick={openModal}>
                     {/* <Link to="/settings"> */}
                     <div className="flex">
                         <Settings className="mr-2" />

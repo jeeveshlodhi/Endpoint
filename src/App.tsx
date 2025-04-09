@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import GlobalDrawer from './global-ui/global-settings-model';
 import GlobalSettingsModal from './global-ui/global-settings-model';
+import { ThemeProvider } from './components/theme-provider';
 
 const router = createBrowserRouter([
     {
@@ -29,11 +30,11 @@ function App() {
     }, []);
 
     return (
-        <>
+        <ThemeProvider defaultTheme="dark" availableThemes={['light', 'dark', 'blue', 'green', 'purple']}>
             <GlobalDrawer />
             <GlobalSettingsModal />
             <RouterProvider router={router} />
-        </>
+        </ThemeProvider>
     );
 }
 

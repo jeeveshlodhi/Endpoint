@@ -2,7 +2,7 @@ import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CodeEditor from '../general-components/editor';
 import { ResponseDataType } from '@/types/api-types';
-import LoadingSkeleton, { MultiStepLoader } from './loaders/loading-skeleton';
+import { MultiStepLoader } from './loaders/loading-skeleton';
 
 interface ResponsePanelProps {
     responseEditor: string | null;
@@ -105,7 +105,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
                                 >
                                     {response.status_code}
                                 </span>{' '}
-                                • {formatBytes(response.size_bytes)} • {timeTaken}ms
+                                • {formatBytes(response.size_bytes)} • {timeTaken}
                             </span>
                         </>
                     )}
