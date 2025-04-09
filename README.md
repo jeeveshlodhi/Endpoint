@@ -253,29 +253,19 @@ Check out our [Quick Start Guide](https://docs.endpointapp.io/quickstart) for mo
 ### Prerequisites
 - Node.js (v16 or higher)
 - Rust (latest stable)
-- Python 3.7+ (for the Python server components)
 
 ### Development Environment
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/endpoint.git
+git clone https://github.com/lodhijeevesh/endpoint.git
 cd endpoint
 
 # Install dependencies
 npm install
 
-# Make utility scripts executable
-chmod +x run_servers.sh monitor_logs.sh stop_servers.sh
-
-# Start development servers
-./run_servers.sh
-
-# Monitor logs
-./monitor_logs.sh
-
-# Stop servers when done
-./stop_servers.sh
+#Run Tauri Server
+npx tauri dev
 ```
 
 ### Recommended IDE Setup
