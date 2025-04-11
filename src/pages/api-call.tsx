@@ -79,61 +79,6 @@ const ApiClient: React.FC = () => {
         }
     }, [response, responseType]);
 
-    useEffect(() => {
-        if (url) {
-            try {
-                const urlObj = new URL(url);
-                const paramsObj = Array.from(new URLSearchParams(urlObj.search).entries());
-
-                setParams(prevParams => {
-                    const newParams = paramsObj.map(([key, value], index) => {
-                        const existingParam = prevParams[index];
-                        return {
-                            key,
-                            value,
-                            description: existingParam?.description || '',
-                            checked: true, // Automatically check params from URL
-                        };
-                    });
-
-                    // Keep any existing params beyond the ones in the URL
-                    const remainingParams = prevParams.slice(paramsObj.length);
-                    const paramsUpdated = [...newParams, ...remainingParams];
-                    if (paramsUpdated.length === 0 || paramsUpdated[paramsUpdated.length - 1].key !== '') {
-                        paramsUpdated.push({ key: '', value: '', description: '', checked: false });
-                    }
-
-                    return paramsUpdated;
-                });
-            } catch (error) {
-                console.error('Invalid URL:', error);
-            }
-        }
-    }, [url]);
-
-    useEffect(() => {
-        if (!url || !url.startsWith('http')) return; // Ensure URL is valid before processing
-
-        try {
-            console.log(url);
-            const urlObj = new URL(url);
-
-            let newUrl = `${urlObj.origin}${urlObj.pathname}`;
-
-            params.forEach(({ key, value, checked }, index) => {
-                if (checked && value.trim()) {
-                    newUrl += `${index === 0 ? '?' : '&'}${key}=${encodeURIComponent(value)}`;
-                }
-            });
-
-            if (decodeURIComponent(newUrl) !== decodeURIComponent(url)) {
-                setUrl(newUrl);
-            }
-        } catch (error) {
-            console.error('Invalid URL:', error);
-        }
-    }, [params]);
-
     // Helper function to escape HTML for safe display
     const escapeHtml = (html: string): string => {
         return html
@@ -309,6 +254,8 @@ const ApiClient: React.FC = () => {
             <ResizablePanelGroup direction="vertical">
                 <ResizablePanel defaultSize={25} className="p-2">
                     <RequestTabs
+                        url={url}
+                        setUrl={setUrl}
                         params={params}
                         setParams={setParams}
                         headers={headers}

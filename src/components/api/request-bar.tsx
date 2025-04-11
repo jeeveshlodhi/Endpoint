@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,10 @@ interface RequestBarProps {
 }
 
 const RequestBar: React.FC<RequestBarProps> = ({ method, setMethod, url, setUrl, onSendRequest }) => {
+    useEffect(() => {
+        console.log(url);
+    }, [url]);
+
     const handleUrlInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const url = e.target.value;
         setUrl(url);

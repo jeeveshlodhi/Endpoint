@@ -12,3 +12,11 @@ export function useKeybinding(key: string, callback: (e: KeyboardEvent) => void)
         return () => unregisterKeybinding(key);
     }, [key, callback]);
 }
+
+export function sanitizeUrl(url: string): string {
+    // If the URL doesn't start with http:// or https://, add https://
+    if (!/^https?:\/\//i.test(url)) {
+        url = "https://" + url;
+    }
+    return url;
+}

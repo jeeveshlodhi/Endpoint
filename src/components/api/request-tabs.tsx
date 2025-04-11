@@ -10,6 +10,8 @@ import { AuthConfigType, AuthType, BodyType, FormDataItemType, ParamItemType } f
 
 interface RequestTabsProps {
     // All the props from the parent component
+    url: string;
+    setUrl: React.Dispatch<React.SetStateAction<string>>;
     params: ParamItemType[];
     setParams: React.Dispatch<React.SetStateAction<ParamItemType[]>>;
     headers: ParamItemType[];
@@ -49,7 +51,7 @@ const RequestTabs: React.FC<RequestTabsProps> = (props: RequestTabsProps) => {
             </TabsList>
 
             <TabsContent value="params">
-                <QueryParams params={props.params} setParams={props.setParams} />
+                <QueryParams url={props.url} setUrl={props.setUrl} />
             </TabsContent>
 
             <TabsContent value="authorization">

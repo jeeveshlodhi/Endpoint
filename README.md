@@ -264,7 +264,7 @@ cd endpoint
 # Install dependencies
 npm install
 
-#Run Tauri Server
+# Run Tauri Server
 npx tauri dev
 ```
 

@@ -1,18 +1,52 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
+import { ParamItemType } from '@/types/api-types';
+import { sanitizeUrl } from '@/lib/utils';
 
 interface QueryParamsProps {
-    params: { key: string; value: string; description: string; checked: boolean }[];
-    setParams: React.Dispatch<
-        React.SetStateAction<{ key: string; value: string; description: string; checked: boolean }[]>
-    >;
+    url: string;
+    setUrl: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const QueryParams: React.FC<QueryParamsProps> = ({ params, setParams }) => {
+const QueryParams: React.FC<QueryParamsProps> = ({ url, setUrl }) => {
+    const [params, setParams] = useState<ParamItemType[]>([{ key: '', value: '', description: '', checked: false }]);
+
+    useEffect(() => {
+        if (url) {
+            try {
+                const urlObj = new URL(sanitizeUrl(url));
+                const paramsObj = Array.from(new URLSearchParams(urlObj.search).entries());
+
+                setParams(prevParams => {
+                    const newParams = paramsObj.map(([key, value], index) => {
+                        const existingParam = prevParams[index];
+                        return {
+                            key,
+                            value,
+                            description: existingParam?.description || '',
+                            checked: true, // Automatically check params from URL
+                        };
+                    });
+
+                    // Keep any existing params beyond the ones in the URL
+                    const remainingParams = prevParams.slice(paramsObj.length);
+                    const paramsUpdated = [...newParams, ...remainingParams];
+                    if (paramsUpdated.length === 0 || paramsUpdated[paramsUpdated.length - 1].key !== '') {
+                        paramsUpdated.push({ key: '', value: '', description: '', checked: false });
+                    }
+
+                    return paramsUpdated;
+                });
+            } catch (error) {
+                console.error('Invalid URL:', error);
+            }
+        }
+    }, [url]);
+
     const deleteParam = (index: number) => {
         setParams(prevParams => {
             // Prevent deleting the last empty row
@@ -37,6 +71,16 @@ const QueryParams: React.FC<QueryParamsProps> = ({ params, setParams }) => {
             const lastParam = newParams[newParams.length - 1];
             if (lastParam.key || lastParam.value || lastParam.description) {
                 newParams.push({ key: '', value: '', description: '', checked: false });
+            }
+            try {
+                const activeParams = newParams.filter(p => p.checked && p.key);
+                const queryString = new URLSearchParams(activeParams.map(({ key, value }) => [key, value])).toString();
+
+                const urlObj = new URL(sanitizeUrl(url));
+                urlObj.search = queryString;
+                setUrl(urlObj.toString());
+            } catch (e) {
+                console.error('Invalid URL during param update');
             }
 
             return newParams;

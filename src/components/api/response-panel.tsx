@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import CodeEditor from '../general-components/editor';
+import CodeEditor, { LanguageType } from '../general-components/editor';
 import { ResponseDataType } from '@/types/api-types';
 import { MultiStepLoader } from './loaders/loading-skeleton';
 
@@ -55,12 +55,45 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
     error,
     isLoading,
 }) => {
+    const [language, setLanguage] = useState<LanguageType>('json');
     const getStatusClass = (statusCode: number) => {
         if (statusCode >= 200 && statusCode < 300) return 'bg-green-100 text-green-800';
         if (statusCode >= 300 && statusCode < 400) return 'bg-blue-100 text-blue-800';
         if (statusCode >= 400 && statusCode < 500) return 'bg-yellow-100 text-yellow-800';
         if (statusCode >= 500) return 'bg-red-100 text-red-800';
         return 'bg-gray-100 text-gray-800';
+    };
+
+    const getLanguageFromType = (type: string): LanguageType => {
+        switch (type) {
+            case 'application/json':
+                return 'json';
+            case 'text/html':
+                return 'html';
+            case 'text/plain':
+                return 'text';
+            default:
+                return 'json';
+        }
+    };
+
+    const formatResponseContent = (content: string, type: 'json' | 'html' | 'text'): string => {
+        try {
+            switch (type) {
+                case 'json':
+                    return JSON.stringify(JSON.parse(content), null, 2); // Pretty JSON
+                case 'html':
+                    // Optional: Beautify HTML (you can add a library if needed)
+                    return content; // Placeholder - could use prettier or html-beautifier
+                case 'text':
+                    return content.trim();
+                default:
+                    return content;
+            }
+        } catch (err) {
+            // If formatting fails (like invalid JSON), return as-is
+            return content;
+        }
     };
 
     const formatBytes = (bytes: number) => {
@@ -77,6 +110,19 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
                 ? `${response.execution_time_ms} ms`
                 : `${(response.execution_time_ms / 1000).toFixed(2)} s`
             : 'N/A';
+
+    useEffect(() => {
+        if (!response || !response.headers) return;
+
+        const contentType = response.headers['content-type']?.split(';')[0];
+        if (contentType) {
+            const newLang = getLanguageFromType(contentType);
+            setLanguage(newLang);
+        } else {
+            setLanguage(responseType);
+        }
+    }, [response, responseType]);
+
     return (
         <div className="mt-2">
             <div className="flex justify-between items-center">
@@ -121,9 +167,9 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
                     </div>
                 ) : (
                     <CodeEditor
-                        initialValue={response?.content || ''}
+                        initialValue={response?.content ? formatResponseContent(response.content, responseType) : ''}
                         height="100%"
-                        language={responseType === 'json' ? 'json' : 'text'}
+                        language={language}
                         readOnly={false}
                         theme="light"
                     />
