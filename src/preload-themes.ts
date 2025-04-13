@@ -1,4 +1,4 @@
-import themeService from "./services/theme-service";
+import themeService from "./config/services/theme-service";
 
 /**
  * Preload themes before app initialization

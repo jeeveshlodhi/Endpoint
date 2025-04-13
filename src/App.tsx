@@ -1,13 +1,13 @@
 import './App.css';
-import ApiRequest from './pages/api-call';
-import Dashboard from './pages/dashboard';
-import Settings from './pages/settings/settings';
-import { setupGlobalKeybindings } from '@/lib/keybindings';
+import ApiRequest from './components/screens/api-call';
+import Dashboard from './components/screens/dashboard';
+import Settings from './components/screens/settings/settings';
+import { setupGlobalKeybindings } from '@/config/utils/keybindings';
 import { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router';
-import GlobalDrawer from './global-ui/global-settings-model';
-import GlobalSettingsModal from './global-ui/global-settings-model';
-import { ThemeProvider } from './components/theme-provider';
+import GlobalDrawer from './components/shared/global/global-settings-model';
+import GlobalSettingsModal from './components/shared/global/global-settings-model';
+import { ThemeProvider } from './components/shared/general-components/theme-provider';
 
 const router = createBrowserRouter([
     {
