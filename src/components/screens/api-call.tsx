@@ -19,7 +19,6 @@ import {
 } from '@/config/types/api-types';
 import AppLayout from '@/components/layouts/app-layout';
 import { useKeybinding } from '@/config/utils/utils';
-import { platform } from '@tauri-apps/plugin-os';
 
 // Define interfaces for all the types
 
@@ -62,8 +61,6 @@ const ApiClient: React.FC = () => {
     const [responseType, setResponseType] = useState<ResponseFormat>('json');
     const [responseContent, setResponseContent] = useState<string>('');
 
-    const currentPlatform = platform();
-
     // Update response editor content when response changes
     useEffect(() => {
         if (response) {
@@ -90,7 +87,6 @@ const ApiClient: React.FC = () => {
     };
 
     // Resizing state
-    const [requestHeight, setRequestHeight] = useState(350); // Initial height
     const containerRef = useRef<HTMLDivElement>(null);
 
     const buildRequestHeaders = (): Record<string, string> => {
@@ -230,10 +226,13 @@ const ApiClient: React.FC = () => {
             setIsLoading(false);
         }
     };
-
-    useKeybinding(currentPlatform == 'macos' ? 'Cmd+ENTER' : 'Ctrl+ENTER', e => {
+    useKeybinding('Cmd+ENTER', e => {
         e.preventDefault();
-        // console.log('Keybinding triggered');
+        handleSendRequest();
+    });
+    
+    useKeybinding('Ctrl+ENTER', e => {
+        e.preventDefault();
         handleSendRequest();
     });
 

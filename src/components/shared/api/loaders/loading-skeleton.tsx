@@ -63,7 +63,6 @@ export const MultiStepLoader = ({
         }, duration / 50); // More frequent updates for smoother progress
 
         return () => clearInterval(interval);
-        x;
     }, [loading, loadingStates.length, duration, onComplete]);
 
     if (!loading) return null;

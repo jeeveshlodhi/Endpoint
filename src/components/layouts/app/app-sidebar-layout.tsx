@@ -3,17 +3,16 @@ import { AppShell } from '@/components/shared/general-components/app-shell';
 import { AppSidebar } from '@/components/shared/general-components/app-sidebar';
 import { AppSidebarHeader } from '@/components/shared/general-components/app-sidebar-header';
 import AppTitle from '@/components/shared/general-components/app-title';
-import { useEffect, type PropsWithChildren } from 'react';
+import { useEffect, useState, type PropsWithChildren } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/shared/shadcn-components/resizable';
 import { useSidebar } from '@/components/shared/shadcn-components/sidebar';
-
 import { useKeybinding } from '@/config/utils/utils';
-import { platform } from '@tauri-apps/plugin-os';
+import { useIsTauri } from '@/config/hooks/use-isTauri';
 
 export default function AppSidebarLayout({ children }: PropsWithChildren) {
     return (
         <div className="h-screen w-screen overflow-hidden flex flex-col">
-            <AppTitle />
+            {useIsTauri() && <AppTitle />}
             <div className="flex flex-1 overflow-hidden">
                 <AppShell variant="sidebar">
                     <AppShellContent>{children}</AppShellContent>
@@ -24,38 +23,47 @@ export default function AppSidebarLayout({ children }: PropsWithChildren) {
 }
 
 function AppShellContent({ children }: { children: React.ReactNode }) {
-    const { open, toggleSidebar } = useSidebar(); // Access sidebar state safely
+    const { open, toggleSidebar } = useSidebar();
+    const [currentPlatform, setCurrentPlatform] = useState<string | null>(null);
 
-    const currentPlatform = platform();
+    useEffect(() => {
+        const getPlatform = async () => {
+            if (useIsTauri()) {
+                const { platform } = await import('@tauri-apps/plugin-os');
+                setCurrentPlatform(platform());
+            }
+        };
+        getPlatform();
+    }, []);
 
-    useKeybinding(currentPlatform == 'macos' ? 'Cmd+D' : 'Ctrl+D', e => {
-        e.preventDefault();
-        toggleSidebar();
-    });
+    useKeybinding(
+        currentPlatform === 'macos' ? 'Cmd+D' : 'Ctrl+D',
+        e => {
+            e.preventDefault();
+            toggleSidebar();
+        },
+        [currentPlatform],
+    );
 
     return (
-        <ResizablePanelGroup direction="horizontal" className="flex-1">
-            {/* Sidebar Panel - Collapsible based on isOpen */}
+        <ResizablePanelGroup direction="horizontal" className="flex-1 relative">
             <ResizablePanel
-                defaultSize={open ? 20 : 0}
-                minSize={0}
-                maxSize={30}
-                collapsible
-                collapsedSize={open ? 20 : 0}
-                translate="yes"
+                defaultSize={16}
+                minSize={17}
+                maxSize={35}
                 style={{
-                    transition: 'all 180ms ease',
+                    display: open ? 'block' : 'none',
+                    position: 'relative',
+                    zIndex: 10,
                 }}
+                className="h-full"
             >
-                {' '}
                 <AppSidebar />
             </ResizablePanel>
 
-            {/* Resizable Handle */}
-            <ResizableHandle withHandle className="mx-1" onDrag={() => console.log('drag')} />
+            {open && <ResizableHandle withHandle className="mx-1" />}
 
-            {/* Main Content Panel */}
-            <ResizablePanel className="flex flex-col">
+            <ResizablePanel defaultSize={open ? 80 : 100} minSize={65} className="flex flex-col h-full">
                 <AppContent variant="sidebar" className="flex-1 overflow-hidden">
                     <AppSidebarHeader />
                     <div className="h-full w-full overflow-auto">{children}</div>
