@@ -6,7 +6,7 @@ use axum::{
 use std::net::SocketAddr;
 use tower_http::cors::{Any, CorsLayer};
 
-use crate::api::routes::{health, http};
+use crate::api::routes::{app_data, health, http};
 use crate::api::state::AppState;
 
 pub async fn start_api_server() {
@@ -30,6 +30,7 @@ pub async fn start_api_server() {
     let app = Router::new()
         .route("/api/health", get(health::health_check))
         .route("/api/fetch", post(http::fetch_url))
+        .route("/api/list-workspace", post(app_data::list_workspace))
         .layer(cors)
         .with_state(app_state);
 

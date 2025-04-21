@@ -1,8 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shared/shadcn-components/select';
-import CodeEditor, { LanguageType } from '../general-components/editor';
+import React, { useEffect, useState, useMemo } from 'react';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/shared/shadcn-components/select';
+import CodeEditor from '../general-components/editor';
 import { ResponseDataType } from '@/config/types/api-types';
-import { MultiStepLoader } from './loaders/loading-skeleton';
+import { Skeleton } from '../shadcn-components/skeleton';
 
 interface ResponsePanelProps {
     responseEditor: string | null;
@@ -13,40 +19,6 @@ interface ResponsePanelProps {
     isLoading: boolean;
 }
 
-const loadingStates = [
-    { text: 'Training digital hamsters to run faster' },
-    { text: 'Convincing the server to cooperate' },
-    { text: 'Reticulating splines' },
-    { text: 'Counting to infinity (twice)' },
-    { text: 'Generating witty dialog...' },
-    { text: 'Brewing coffee for the developers' },
-    { text: 'Warming up the quantum fluctuator' },
-    { text: 'Untangling the digital spaghetti' },
-    { text: 'Checking if anyone actually reads these' },
-    { text: 'Converting caffeine to code' },
-    { text: 'Searching for the last digit of π' },
-    { text: 'Calculating the meaning of life' },
-    { text: 'Teaching AI to appreciate humor' },
-    { text: 'Waiting for the universe to respond' },
-    { text: 'Mining some cryptocurrency while we wait' },
-    { text: 'Entertaining you with loading messages' },
-    { text: 'Dividing by zero (carefully)' },
-    { text: 'Polishing pixels to make them shinier' },
-    { text: 'Summoning digital demons' },
-    { text: 'Downloading more RAM' },
-    { text: 'Taking a quick coffee break' },
-    { text: 'Questioning existence' },
-    { text: 'Feeding the server hamsters' },
-    { text: 'Convincing electrons to move faster' },
-    { text: 'Asking ChatGPT for better loading messages' },
-    { text: 'Deflecting the inevitable stack overflow' },
-    { text: 'Turning it off and on again' },
-    { text: 'Playing rock-paper-scissors with the database' },
-    { text: 'Applying machine learning to this loading bar' },
-    { text: 'Sacrificing a byte to the coding gods' },
-    { text: 'Almost there... maybe... probably' },
-];
-
 const ResponsePanel: React.FC<ResponsePanelProps> = ({
     responseEditor,
     responseType,
@@ -55,7 +27,13 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
     error,
     isLoading,
 }) => {
-    const [language, setLanguage] = useState<LanguageType>('json');
+    const [language, setLanguage] = useState<string>('json');
+    
+    const formattedContent = useMemo(() => {
+        if (!response?.content) return '';
+        return formatResponseContent(response.content, responseType);
+    }, [response?.content, responseType]);
+
     const getStatusClass = (statusCode: number) => {
         if (statusCode >= 200 && statusCode < 300) return 'bg-green-100 text-green-800';
         if (statusCode >= 300 && statusCode < 400) return 'bg-blue-100 text-blue-800';
@@ -64,7 +42,7 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
         return 'bg-gray-100 text-gray-800';
     };
 
-    const getLanguageFromType = (type: string): LanguageType => {
+    const getLanguageFromType = (type: string) => {
         switch (type) {
             case 'application/json':
                 return 'json';
@@ -77,24 +55,23 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
         }
     };
 
-    const formatResponseContent = (content: string, type: 'json' | 'html' | 'text'): string => {
+    function formatResponseContent(content: string, type: 'json' | 'html' | 'text'): string {
         try {
             switch (type) {
                 case 'json':
-                    return JSON.stringify(JSON.parse(content), null, 2); // Pretty JSON
+                    return JSON.stringify(JSON.parse(content), null, 2);
                 case 'html':
-                    // Optional: Beautify HTML (you can add a library if needed)
-                    return content; // Placeholder - could use prettier or html-beautifier
+                    return content;
                 case 'text':
                     return content.trim();
                 default:
                     return content;
             }
         } catch (err) {
-            // If formatting fails (like invalid JSON), return as-is
             return content;
         }
-    };
+    }
+
 
     const formatBytes = (bytes: number) => {
         if (bytes === 0) return '0 Bytes';
@@ -162,12 +139,10 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
             </div>
             <div className="min-h-[450px]">
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center gap-4">
-                        <MultiStepLoader loadingStates={loadingStates} loading={isLoading} duration={800} />
-                    </div>
+                    <Skeleton className="h-100" />
                 ) : (
                     <CodeEditor
-                        initialValue={response?.content ? formatResponseContent(response.content, responseType) : ''}
+                        initialValue={formattedContent}
                         height="100%"
                         language={language}
                         readOnly={false}
@@ -175,7 +150,6 @@ const ResponsePanel: React.FC<ResponsePanelProps> = ({
                     />
                 )}
             </div>
-            c
         </div>
     );
 };
