@@ -148,5 +148,6 @@ For questions, feedback, or support:
 Thank you to all the contributors who have helped make Endpoint better:
 
 <a href="https://github.com/yourusername/endpoint/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=yourusername/endpoint" />
+  <img src="https://contrib.rocks/image?repo=jeeveshlodhi/endpoint" />
+  <img src="https://contrib.rocks/image?repo=Kushagras634/endpoint" />
 </a>
