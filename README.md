@@ -1,152 +1,84 @@
-# Endpoint: Advanced API Testing Tool
+# Turborepo starter
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/jeeveshlodhi/Endpoint/refs/heads/master/src/assets/Endpoint.png" alt="Endpoint Logo" width="100" height="100" />
-</p>
+This Turborepo starter is maintained by the Turborepo core team.
 
-<p align="center">
-  <a href="https://github.com/yourusername/endpoint/releases"><img src="https://img.shields.io/github/v/release/yourusername/endpoint" alt="Latest Release"></a>
-  <a href="https://github.com/yourusername/endpoint/blob/main/LICENSE"><img src="https://img.shields.io/github/license/yourusername/endpoint" alt="License"></a>
-  <a href="https://discord.gg/pMhTMcE3kS"><img src="https://img.shields.io/discord/YOUR_SERVER_ID?color=7289DA&logo=discord&logoColor=white" alt="Discord"></a>
-</p>
+## Using this example
 
-## Overview
+Run the following command:
 
-Endpoint is a powerful, open-source API testing tool built with Tauri, React, and TypeScript. It combines the speed and efficiency of native applications with the flexibility of modern web technologies to deliver a superior API testing experience.
-
-## Features
-
-### Core Request & Response Handling
-- **Universal API Protocol Support**
-  - REST, GraphQL, WebSockets, gRPC, SOAP APIs
-- **Advanced Request Builder**
-  - Intelligent body editor, custom headers, query parameters, URL path variables
-- **Comprehensive Response Visualization**
-  - JSON, XML, image previews, response time metrics
-
-### Authentication & Security
-- **Complete Auth Solutions**
-  - OAuth 2.0, JWT, API Keys, Basic Auth, Digest auth
-- **Security Testing Features**
-  - SSL cert verification, CORS testing, security header analysis
-
-### Environment & Workspace Management
-- **Sophisticated Environment System**
-  - Hierarchical environments (global, team, project, local)
-  - Environment variables, secret protection
-- **Workspace Organization**
-  - Projects, collections, folders hierarchy, tagging system
-
-### Testing & Automation
-- **Comprehensive Testing Framework**
-  - Response validation, JSON Schema validation, test suites
-- **Advanced Automation**
-  - Scheduled runs, CI/CD integration, batch operations
-
-### Collaboration & Documentation
-- **Team Collaboration Tools**
-  - Real-time synchronization, commenting system, activity feed
-- **API Documentation**
-  - Auto-generated documentation, OpenAPI/Swagger integration
-
-## Getting Started
-
-1. **Download and Install** Endpoint for your operating system.
-2. **Create a New Collection** to organize your API requests.
-3. **Add Environment Variables** for different testing environments.
-4. **Create Your First Request** by selecting the HTTP method and entering the URL.
-5. **Run and Test** your API endpoints.
-
-Check out our [Quick Start Guide](https://docs.endpointapp.io/quickstart) for more detailed instructions.
-
-## Development Setup
-
-### Prerequisites
-- Node.js (v16 or higher)
-- Rust (latest stable)
-
-### Installation
-```bash
-# Clone the repository
-git clone https://github.com/lodhijeevesh/endpoint.git
-cd endpoint
-
-# Install dependencies
-npm install
-
-# Run Tauri Server
-npx tauri dev
+```sh
+npx create-turbo@latest
 ```
 
-### Recommended IDE Setup
-- [VS Code](https://code.visualstudio.com/) with extensions:
-  - Tauri
-  - rust-analyzer
-  - ESLint
-  - Prettier
+## What's inside?
 
-## Project Roadmap
+This Turborepo includes the following packages/apps:
 
-| Timeline | Feature |
-|----------|---------|
-| Q1 2024 | Complete the basic API calling module |
-| Q1 2024 | Implement user authentication and authorization |
-| Q1 2024 | Implement Workspace Management and Git Integration |
-| Q2 2024 | Advanced AI-powered test generation |
-| Q2 2024 | Enhanced team collaboration features |
-| Q2 2024 | Cloud synchronization for seamless multi-device experience |
-| Q2 2024 | Performance testing enhancements |
-| Q3 2024 | Extensive plugin system for custom extensions |
+### Apps and Packages
 
-Check our [public roadmap](https://github.com/yourusername/endpoint/projects) for more details.
+- `docs`: a [Next.js](https://nextjs.org/) app
+- `web`: another [Next.js](https://nextjs.org/) app
+- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
+- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
+- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
 
-## Contributing
+Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
-We welcome contributions of all kinds! See our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.
+### Utilities
 
-Not sure where to start? Check out our [good first issues](https://github.com/yourusername/endpoint/labels/good%20first%20issue).
+This Turborepo has some additional tools already setup for you:
 
-## Community
+- [TypeScript](https://www.typescriptlang.org/) for static type checking
+- [ESLint](https://eslint.org/) for code linting
+- [Prettier](https://prettier.io) for code formatting
 
-Join our growing community and stay updated:
+### Build
 
-- [Discord Server](https://discord.gg/pMhTMcE3kS)
-- [Twitter](https://twitter.com/endpoint_app)
-- [Reddit](https://reddit.com/r/endpointapp)
+To build all apps and packages, run the following command:
 
-## Security
+```
+cd my-turborepo
+pnpm build
+```
 
-If you discover a security vulnerability, please follow our [security policy](SECURITY.md).
+### Develop
 
-## License
+To develop all apps and packages, run the following command:
 
-Endpoint is available under the [Apache License 2.0](LICENSE).
+```
+cd my-turborepo
+pnpm dev
+```
 
-## Support the Project
+### Remote Caching
 
-If you find Endpoint useful, please consider:
+> [!TIP]
+> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
 
-- ⭐ Starring the repository
-- 🐛 Reporting bugs and suggesting features
-- 🔀 Submitting pull requests
-- 📣 Sharing with your network
+Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
 
-## Contact
+By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
 
-For questions, feedback, or support:
-- Email: [lodhijeevesh@gmail.com](mailto:lodhijeevesh@gmail.com)
-- Discord: [Join our server](https://discord.gg/pMhTMcE3kS)
+```
+cd my-turborepo
+npx turbo login
+```
 
----
+This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
 
-<p align="center">
-  Made with ❤️ by the Endpoint Team
-</p>
+Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
 
-## Contributors
+```
+npx turbo link
+```
 
-Thank you to all the contributors who have helped make Endpoint better:
+## Useful Links
 
-<a href="https://github.com/yourusername/endpoint/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=jeeveshlodhi/endpoint" />
-</a>
+Learn more about the power of Turborepo:
+
+- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
+- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
+- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
+- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
+- [Configuration Options](https://turborepo.com/docs/reference/configuration)
+- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
