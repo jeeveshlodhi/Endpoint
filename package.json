@@ -1,9 +1,11 @@
 {
-  "name": "Endpoint",
+  "name": "endpoint",
   "private": true,
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "tauri:dev": "pnpm --filter ./apps/tauri tauri dev",
+    "tauri:build": "pnpm --filter ./apps/tauri build",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"
