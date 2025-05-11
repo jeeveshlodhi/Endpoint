@@ -3,7 +3,9 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev",
+    "dev": "pnpm concurrently \"pnpm backend\" \"pnpm react:dev\"",
+    "backend": "pnpm --filter ./apps/backend dev",
+    "react:dev": "pnpm --filter ./apps/tauri dev",
     "tauri:dev": "pnpm --filter ./apps/tauri tauri dev",
     "tauri:build": "pnpm --filter ./apps/tauri build",
     "lint": "turbo run lint",
@@ -11,6 +13,7 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "prettier": "^3.5.3",
     "turbo": "^2.5.2",
     "typescript": "5.8.2"

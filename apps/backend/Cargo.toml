@@ -1,18 +1,54 @@
 [package]
-name = "rust_backend_server"
+name = "Endpoint"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = "0.7"
-tokio = { version = "1", features = ["full"] }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-tower = "0.4"
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
-dotenv = "0.15"
-anyhow = "1"
+# Web framework
+actix-web = "4.4"
+actix-rt = "2.9"
+actix-cors = "0.6"
 
-# Optional: For database support (e.g., PostgreSQL)
-sqlx = { version = "0.7", features = ["postgres", "runtime-tokio", "macros"] }
+# Database
+sqlx = { version = "0.7", features = [
+    "runtime-tokio-rustls",
+    "postgres",
+    "chrono",
+    "uuid",
+    "json",
+    "macros",
+] }
+tokio-postgres = "0.7"
+tokio = { version = "1.33", features = ["full"] }
+deadpool-postgres = "0.11"
+url = "2.4"
+
+# Authentication
+jsonwebtoken = "9.1"
+bcrypt = "0.15"
+
+# Serialization/Deserialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Logging and error handling
+log = "0.4"
+env_logger = "0.10"
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Environment variables and config
+dotenv = "0.15"
+config = "0.13"
+
+# Utilities
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.5", features = ["serde", "v4"] }
+futures = "0.3"
+async-trait = "0.1"
+validator = { version = "0.16", features = ["derive"] }
+reqwest = { version = "0.11", features = ["json", "rustls-tls"] }
+
+[dev-dependencies]
+mockall = "0.12"
+tokio-test = "0.4"
